@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { restaurants } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { Footer } from '@/components/footer'
 
 // Helper to generate slug from restaurant name
 function generateSlug(name: string): string {
@@ -54,6 +55,7 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       {/* Hero with centered content */}
       <div className="relative h-72 md:h-80">
@@ -201,11 +203,9 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
           </Card>
         )}
 
-        {/* Powered by footer */}
-        <div className="text-center mt-12 pb-8">
-          <p className="text-xs text-muted-foreground">Powered by Dine</p>
-        </div>
       </div>
     </div>
+    <Footer />
+    </>
   )
 }

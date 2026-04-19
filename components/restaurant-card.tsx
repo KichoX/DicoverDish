@@ -140,106 +140,91 @@ export function RestaurantCard({ restaurant, variant = 'default' }: RestaurantCa
           </div>
         </div>
 
-        {/* Desktop: Two-column layout with larger image */}
-        <div className="hidden md:flex">
-          {/* Image */}
-          <div className="relative flex-shrink-0">
-            <div className="w-64 h-48 bg-muted">
-              <Image
-                src={restaurant.image}
-                alt={restaurant.name}
-                width={256}
-                height={192}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
+        {/* Desktop layout */}
+        <div className="hidden md:flex min-h-[180px]">
+          {/* Image — stretches to full card height */}
+          <div className="relative w-60 flex-shrink-0 self-stretch overflow-hidden">
+            <Image
+              src={restaurant.image}
+              alt={restaurant.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
             <button
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setIsFavorite(!isFavorite)
-              }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFavorite(!isFavorite) }}
               type="button"
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               aria-pressed={isFavorite}
-              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 after:absolute after:-inset-2"
+              className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              <Heart
-                className={cn(
-                  'w-4 h-4',
-                  isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                )}
-              />
+              <Heart className={cn('w-4 h-4', isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400')} />
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-5 flex flex-col">
-            {/* Top Row: Rating, Status, Name */}
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-full">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span className="text-sm font-bold text-amber-700">{restaurant.rating.toFixed(1)}</span>
-                  </div>
-                  <Badge
-                    className={cn(
-                      'text-xs px-2.5 py-1 rounded-full font-medium border-0',
-                      restaurant.isOpen
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-gray-100 text-gray-600'
-                    )}
-                  >
-                    {restaurant.isOpen ? 'Open now' : 'Closed'}
-                  </Badge>
+          <div className="flex-1 p-5 flex flex-col justify-between">
+            <div>
+              {/* Rating + status */}
+              <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-bold text-amber-700">{restaurant.rating.toFixed(1)}</span>
                 </div>
-                <h3 className="font-semibold text-xl leading-tight group-hover:text-primary transition-colors">
-                  {restaurant.name}
-                </h3>
+                <Badge className={cn('text-xs px-2.5 py-0.5 rounded-full font-medium border-0', restaurant.isOpen ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500')}>
+                  {restaurant.isOpen ? 'Open now' : 'Closed'}
+                </Badge>
+              </div>
+
+              {/* Name */}
+              <h3 className="font-bold text-xl leading-tight mb-3 group-hover:text-primary transition-colors">
+                {restaurant.name}
+              </h3>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {restaurant.cuisines.map((cuisine) => (
+                  <span key={cuisine} className="inline-flex items-center gap-1 text-xs text-foreground bg-muted px-2.5 py-1 rounded-lg">
+                    <span>{cuisineFlags[cuisine] || '🍽️'}</span>
+                    <span>{cuisine}</span>
+                  </span>
+                ))}
+                {restaurant.tags.map((tag) => (
+                  <span key={tag} className="inline-flex items-center gap-1 text-xs text-foreground bg-muted px-2.5 py-1 rounded-lg">
+                    <span>{tagIcons[tag] || '✨'}</span>
+                    <span>{tag}</span>
+                  </span>
+                ))}
               </div>
             </div>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {restaurant.cuisines.map((cuisine) => (
-                <span 
-                  key={cuisine} 
-                  className="inline-flex items-center gap-1.5 text-sm text-foreground bg-muted px-3 py-1.5 rounded-lg"
-                >
-                  <span>{cuisineFlags[cuisine] || '🍽️'}</span>
-                  <span>{cuisine}</span>
-                </span>
-              ))}
-              {restaurant.tags.map((tag) => (
-                <span 
-                  key={tag} 
-                  className="inline-flex items-center gap-1.5 text-sm text-foreground bg-muted px-3 py-1.5 rounded-lg"
-                >
-                  <span>{tagIcons[tag] || '✨'}</span>
-                  <span>{tag}</span>
-                </span>
-              ))}
-            </div>
-
-            {/* Bottom Row: Info + Button */}
-            <div className="mt-auto flex items-end justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  <span>{restaurant.hours}</span>
+            {/* Bottom: info + actions */}
+            <div className="flex items-end justify-between gap-4">
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{restaurant.hours}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
-                  <span>{restaurant.address}</span>
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{restaurant.address}</span>
                 </div>
               </div>
 
-              <Button 
-                className="rounded-xl h-11 px-6 text-sm font-medium shadow-sm"
-              >
-                Check availability
-              </Button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={(e) => e.preventDefault()}
+                  className="h-10 px-4 rounded-xl text-sm font-medium border-border hover:bg-muted"
+                >
+                  Order online
+                </Button>
+                <Button
+                  onClick={(e) => e.preventDefault()}
+                  className="h-10 px-5 rounded-xl text-sm font-semibold shadow-sm"
+                >
+                  Reserve now
+                </Button>
+              </div>
             </div>
           </div>
         </div>

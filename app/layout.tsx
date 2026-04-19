@@ -8,7 +8,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono
 const _playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: 'Dine - Restaurant Management',
+  title: 'DiscoverDish - Restaurant Discovery',
   description: 'Discover, reserve, and order from your favorite restaurants',
   generator: 'v0.app',
   icons: {

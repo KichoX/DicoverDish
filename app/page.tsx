@@ -1,238 +1,298 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, SlidersHorizontal, CalendarDays, Clock, Users, Star, Utensils, ChevronRight, ChevronDown } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Search, MapPin, ChevronDown, Star, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { RestaurantCard } from '@/components/restaurant-card'
-import { AppShell } from '@/components/app-shell'
+import { SiteHeader } from '@/components/site-header'
+import { MobileNav } from '@/components/mobile-nav'
+import { Footer } from '@/components/footer'
 import { restaurants } from '@/lib/data'
 import { useAppStore } from '@/lib/store'
-import Link from 'next/link'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
-const filterPills = [
-  { id: 'all', label: 'All Filters', icon: SlidersHorizontal, active: true },
-  { id: 'open', label: 'Open now', icon: Clock },
-  { id: 'top', label: 'Top rated', icon: Star },
-  { id: 'cuisine', label: 'Cuisine', icon: Utensils, hasDropdown: true },
+const cuisineCategories = [
+  {
+    name: 'Italian',
+    image: 'https://images.unsplash.com/photo-1595295333158-4742f28fbd85?w=300&h=300&fit=crop',
+    count: 3,
+  },
+  {
+    name: 'Japanese',
+    image: 'https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=300&h=300&fit=crop',
+    count: 1,
+  },
+  {
+    name: 'French',
+    image: 'https://images.unsplash.com/photo-1551183053-bf91798d2e9e?w=300&h=300&fit=crop',
+    count: 1,
+  },
+  {
+    name: 'Chinese',
+    image: 'https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=300&h=300&fit=crop',
+    count: 2,
+  },
+  {
+    name: 'German',
+    image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&h=300&fit=crop',
+    count: 1,
+  },
+  {
+    name: 'Vegan',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop',
+    count: 2,
+  },
+  {
+    name: 'Mexican',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&h=300&fit=crop',
+    count: 0,
+  },
+  {
+    name: 'Seafood',
+    image: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=300&h=300&fit=crop',
+    count: 1,
+  },
+  {
+    name: 'Indian',
+    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&h=300&fit=crop',
+    count: 0,
+  },
 ]
+
+const quickFilters = ['Open Now', 'Top Rated', 'Italian', 'Sushi', 'Vegan']
+
+function RestaurantScrollCard({ restaurant }: { restaurant: typeof restaurants[number] }) {
+  return (
+    <Link href={`/restaurant/${restaurant.id}`} className="flex-shrink-0 w-56 group">
+      <div className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-200">
+        <div className="relative h-44 bg-muted">
+          <Image
+            src={restaurant.image}
+            alt={restaurant.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <span className="text-xs font-bold text-white">{restaurant.rating.toFixed(1)}</span>
+          </div>
+          <div
+            className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+              restaurant.isOpen ? 'bg-emerald-500/90 text-white' : 'bg-black/50 text-white/70'
+            }`}
+          >
+            {restaurant.isOpen ? 'Open' : 'Closed'}
+          </div>
+        </div>
+        <div className="p-3.5">
+          <h3 className="font-semibold text-sm mb-1 line-clamp-1">{restaurant.name}</h3>
+          <p className="text-xs text-muted-foreground mb-1.5">{restaurant.cuisines.join(', ')}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+            {restaurant.description}
+          </p>
+        </div>
+      </div>
+    </Link>
+  )
+}
 
 export default function HomePage() {
   const { isLoggedIn, user } = useAppStore()
-  const [activeFilter, setActiveFilter] = useState('all')
-  
-  const today = new Date()
-  const dayName = today.toLocaleDateString('en-US', { weekday: 'long' })
-  const monthDay = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const topRated = [...restaurants].sort((a, b) => b.rating - a.rating)
+  const openNow = restaurants.filter((r) => r.isOpen)
 
   return (
-    <AppShell>
-      <div className="pb-24 md:pb-8">
-        {/* Mobile Header - Greeting */}
-        <div className="md:hidden px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-bold">
-            {isLoggedIn ? `Hi, ${user?.name.split(' ')[0]}` : 'Discover'} <span role="img" aria-label="wave">👋</span>
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {dayName}, {monthDay} - Today
-          </p>
+    <div className="min-h-screen bg-background">
+      <SiteHeader heroMode={true} />
+
+      {/* ─── HERO ─── */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&h=1080&fit=crop"
+            alt="Restaurant ambiance"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/55 to-black/75" />
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden px-4 py-3">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search your place here"
-                className="pl-10 bg-muted border-0 h-12 rounded-xl"
-              />
+        {/* Content */}
+        <div className="relative z-10 text-center max-w-3xl mx-auto px-4 py-32">
+          <p className="text-white/70 text-xs font-semibold tracking-[0.2em] uppercase mb-5">
+            Your culinary guide
+          </p>
+          <h1
+            className="text-5xl md:text-7xl font-bold text-white mb-5 leading-tight font-serif"
+          >
+            {isLoggedIn
+              ? `Welcome back, ${user?.name.split(' ')[0]}`
+              : 'Discover Restaurants\nYou\'ll Love'}
+          </h1>
+          <p className="text-lg text-white/70 mb-10 max-w-xl mx-auto leading-relaxed">
+            Explore the best dining experiences, reserve a table, or order from hundreds of restaurants near you.
+          </p>
+
+          {/* Search widget */}
+          <div className="bg-white rounded-2xl shadow-2xl p-2 flex items-center max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 px-4 py-2.5 hover:bg-muted rounded-xl transition-colors cursor-pointer flex-shrink-0">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">Hamburg</span>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
-            <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-border">
-              <SlidersHorizontal className="w-4 h-4" />
+            <div className="w-px h-7 bg-border mx-1 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Cuisine, restaurant name..."
+              className="flex-1 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none bg-transparent min-w-0"
+            />
+            <Button className="rounded-xl h-10 px-5 flex-shrink-0 gap-2">
+              <Search className="w-4 h-4" />
+              <span className="hidden sm:inline">Search</span>
             </Button>
           </div>
-        </div>
 
-        {/* Desktop Filter Bar */}
-        <div className="hidden md:block border-b border-border bg-card">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              {/* Date Select */}
-              <Select defaultValue="today">
-                <SelectTrigger className="w-[150px] h-11 rounded-xl bg-muted/60 border border-border/50 text-sm font-medium">
-                  <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <SelectValue placeholder="Date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {/* Time Select */}
-              <Select defaultValue="now">
-                <SelectTrigger className="w-[140px] h-11 rounded-xl bg-muted/60 border border-border/50 text-sm font-medium">
-                  <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <SelectValue placeholder="Time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="now">Now</SelectItem>
-                  <SelectItem value="12">12:00</SelectItem>
-                  <SelectItem value="13">13:00</SelectItem>
-                  <SelectItem value="18">18:00</SelectItem>
-                  <SelectItem value="19">19:00</SelectItem>
-                  <SelectItem value="20">20:00</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {/* Party Size */}
-              <Select defaultValue="2">
-                <SelectTrigger className="w-[140px] h-11 rounded-xl bg-muted/60 border border-border/50 text-sm font-medium">
-                  <Users className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <SelectValue placeholder="Party" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 person</SelectItem>
-                  <SelectItem value="2">2 people</SelectItem>
-                  <SelectItem value="3">3 people</SelectItem>
-                  <SelectItem value="4">4 people</SelectItem>
-                  <SelectItem value="5">5 people</SelectItem>
-                  <SelectItem value="6">6+ people</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="w-px h-8 bg-border mx-2" />
-
-              {/* Filter Pills */}
-              {filterPills.map((filter) => (
-                <Button
-                  key={filter.id}
-                  variant={activeFilter === filter.id ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-11 px-5 rounded-full gap-2 text-sm font-medium"
-                  onClick={() => setActiveFilter(filter.id)}
-                >
-                  <filter.icon className="w-4 h-4" />
-                  {filter.label}
-                  {filter.hasDropdown && <ChevronDown className="w-3 h-3 ml-1" />}
-                </Button>
-              ))}
-            </div>
+          {/* Quick filters */}
+          <div className="flex items-center justify-center gap-2 mt-5 flex-wrap">
+            {quickFilters.map((tag) => (
+              <button
+                key={tag}
+                className="px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-sm border border-white/25 hover:bg-white/25 transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-          {/* Desktop: Title and description */}
-          <div className="hidden md:block mb-8">
-            <h1 className="text-2xl font-bold mb-2">
-              Restaurants in Hamburg <span className="text-muted-foreground font-normal text-base ml-2">{restaurants.length} Restaurants</span>
-            </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
-              Hamburg is a paradise for foodies - from fish markets on the Elbe to trendy restaurants on the harbor mile.
-              Discover international cuisine, sushi bars, modern tapas, and starred restaurants.
-            </p>
-          </div>
+        {/* Scroll cue */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 animate-bounce">
+          <div className="w-px h-10 bg-white/40 rounded-full" />
+        </div>
+      </section>
 
-          {/* Sort Bar - Desktop */}
-          <div className="hidden md:flex items-center justify-between mb-4">
-            <span className="text-sm text-muted-foreground">
-              Showing {restaurants.length} results
-            </span>
-            <Select defaultValue="relevance">
-              <SelectTrigger className="w-[160px] h-9 text-sm">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="relevance">Relevance</SelectItem>
-                <SelectItem value="rating">Rating</SelectItem>
-                <SelectItem value="distance">Distance</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Mobile: Sections */}
-          <div className="md:hidden space-y-8">
-            {/* Cafes Nearby */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Cafes nearby</h2>
-                <Link
-                  href="/search"
-                  className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  View all
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {restaurants.slice(0, 3).map((restaurant) => (
-                  <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-                ))}
-              </div>
-            </section>
-
-            {/* My Top - Only when logged in */}
-            {isLoggedIn && (
-              <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">My top</h2>
-                  <Link
-                    href="/favorites"
-                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    View all
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="space-y-4">
-                  {restaurants.slice(1, 4).map((restaurant) => (
-                    <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Desktop: Two Column Layout */}
-          <div className="hidden md:grid md:grid-cols-[1fr_400px] gap-8">
-            {/* Restaurant List */}
-            <div className="space-y-5">
-              {restaurants.map((restaurant) => (
-                <RestaurantCard key={restaurant.id} restaurant={restaurant} variant="default" />
-              ))}
+      {/* ─── POPULAR CUISINES ─── */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary mb-1.5">
+                Browse by type
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold">Popular Cuisines</h2>
             </div>
-            
-            {/* Map Placeholder */}
-            <div className="sticky top-24 h-[calc(100vh-120px)]">
-              <div className="w-full h-full bg-muted rounded-xl flex items-center justify-center border border-border overflow-hidden">
-                <div className="text-center p-6">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <p className="text-muted-foreground text-sm">Map view</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">Coming soon</p>
+            <Link
+              href="/search"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              View all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {cuisineCategories.map((cuisine) => (
+              <Link
+                key={cuisine.name}
+                href={`/search?cuisine=${cuisine.name.toLowerCase()}`}
+                className="flex-shrink-0 group text-center w-24 md:w-28"
+              >
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden mx-auto mb-3 ring-2 ring-transparent group-hover:ring-primary/40 transition-all duration-200 shadow-sm">
+                  <Image
+                    src={cuisine.image}
+                    alt={cuisine.name}
+                    width={112}
+                    height={112}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
                 </div>
-              </div>
-            </div>
+                <p className="text-sm font-semibold">{cuisine.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {cuisine.count > 0 ? `${cuisine.count} places` : 'Coming soon'}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
-    </AppShell>
+      </section>
+
+      {/* ─── BEST RATED ─── */}
+      <section className="py-14 bg-muted/40">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary mb-1.5">
+                Guests love these
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold">Best Rated</h2>
+            </div>
+            <Link
+              href="/search"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              See all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {topRated.map((r) => (
+              <RestaurantScrollCard key={r.id} restaurant={r} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── OPEN NOW ─── */}
+      <section className="py-14">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary mb-1.5">
+                Ready to serve
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold">Open Right Now</h2>
+            </div>
+            <Link
+              href="/search"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              See all <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {openNow.map((r) => (
+              <RestaurantScrollCard key={r.id} restaurant={r} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA BANNER ─── */}
+      <section className="py-24 bg-primary text-primary-foreground">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <h2
+            className="text-3xl md:text-5xl font-bold mb-4 leading-tight font-serif"
+          >
+            Ready to Explore?
+          </h2>
+          <p className="text-primary-foreground/65 mb-8 text-lg">
+            Browse all {restaurants.length} restaurants in Hamburg and find your next favourite spot.
+          </p>
+          <Link href="/search">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="h-12 px-8 text-base rounded-xl"
+            >
+              View All Restaurants
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
+      <MobileNav />
+    </div>
   )
 }

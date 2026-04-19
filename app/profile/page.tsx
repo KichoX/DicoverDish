@@ -64,7 +64,7 @@ export default function ProfilePage() {
               <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <User className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Welcome to Dine</h2>
+              <h2 className="text-2xl font-bold mb-2">Welcome to DiscoverDish</h2>
               <p className="text-muted-foreground">Sign in to access your favorites, reservations, and more.</p>
             </div>
 

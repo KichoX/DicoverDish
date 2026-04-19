@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-64 bg-card border-r border-border hidden md:block">
         <div className="p-6">
           <Link href="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-xl font-bold">Dine Admin</h1>
+            <h1 className="text-xl font-bold">DiscoverDish Admin</h1>
             <p className="text-sm text-muted-foreground">Restaurant Dashboard</p>
           </Link>
         </div>
@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col">
         <header className="md:hidden sticky top-0 z-40 bg-card border-b border-border">
           <div className="flex items-center justify-between px-4 py-3">
-            <Link href="/" className="font-semibold hover:opacity-80 transition-opacity">Dine Admin</Link>
+            <Link href="/" className="font-semibold hover:opacity-80 transition-opacity">DiscoverDish Admin</Link>
           </div>
           <nav className="flex overflow-x-auto px-4 pb-3 gap-2">
             {navItems.map((item) => {

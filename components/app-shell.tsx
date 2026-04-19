@@ -2,6 +2,7 @@
 
 import { SiteHeader } from './site-header'
 import { MobileNav } from './mobile-nav'
+import { Footer } from './footer'
 import { useAppStore } from '@/lib/store'
 
 interface AppShellProps {
@@ -26,6 +27,8 @@ export function AppShell({ children, showNav = true, showHeader = true }: AppShe
         {children}
       </main>
       
+      <Footer />
+
       {/* Mobile Navigation - only for guests and clients */}
       {showMobileNav && <MobileNav />}
     </div>
