@@ -121,7 +121,7 @@ export function SiteHeader({ heroMode = false }: { heroMode?: boolean }) {
                 variant={isTransparent ? 'outline' : 'ghost'}
                 className={cn(
                   'gap-2',
-                  isTransparent && 'text-white border-white/50 hover:bg-white/15 hover:text-white'
+                  isTransparent && 'text-black border-black/30 hover:bg-black/10 hover:text-black'
                 )}
               >
                 <User className="w-5 h-5" />
