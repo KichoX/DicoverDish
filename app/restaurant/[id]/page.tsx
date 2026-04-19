@@ -175,14 +175,14 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
             <div className="flex gap-3 mb-6 lg:hidden">
               <Button
                 variant="outline"
-                className="flex-1 h-12 rounded-xl gap-2"
+                className="flex-1 h-11 rounded-xl gap-2"
                 onClick={() => handleOrder('pickup')}
               >
                 <ShoppingBag className="w-4 h-4" />
                 Pick Up
               </Button>
               <Button
-                className="flex-1 h-12 rounded-xl gap-2"
+                className="flex-1 h-11 rounded-xl gap-2 shadow-sm"
                 onClick={() => handleOrder('delivery')}
               >
                 <Truck className="w-4 h-4" />
@@ -248,25 +248,31 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                   return (
                     <div key={category} className="mb-8">
                       <h3 className="font-semibold text-lg mb-4">{category}</h3>
-                      <div className="grid gap-3 md:grid-cols-2">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                         {categoryItems.slice(0, 4).map((item) => (
-                          <Card key={item.id} className="overflow-hidden">
-                            <CardContent className="p-3 flex gap-3">
-                              {item.image && (
-                                <Image
-                                  src={item.image}
-                                  alt={item.name}
-                                  width={80}
-                                  height={80}
-                                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                                />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium">{item.name}</h4>
-                                <p className="text-sm text-muted-foreground line-clamp-2">
+                          <Card key={item.id} className="overflow-hidden rounded-2xl border-border/60 pt-0">
+                            <CardContent className="p-2.5">
+                              <div className="relative aspect-square bg-muted rounded-xl overflow-hidden">
+                                {item.image ? (
+                                  <Image
+                                    src={item.image}
+                                    alt={item.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="px-1.5 pt-3 pb-2">
+                                <h4 className="font-medium text-sm md:text-base line-clamp-1">{item.name}</h4>
+                                <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mt-1">
                                   {item.description}
                                 </p>
-                                <p className="font-semibold mt-1">${item.price.toFixed(2)}</p>
+                                <div className="mt-2 flex items-center justify-between">
+                                  <p className="font-semibold">${item.price.toFixed(2)}</p>
+                                  <Button size="sm" className="h-8 rounded-full px-3 shadow-sm" asChild>
+                                    <Link href={`/r/${restaurantSlug}/menu`}>Add</Link>
+                                  </Button>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
@@ -276,7 +282,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                   )
                 })}
                 <Button
-                  className="w-full h-12 rounded-xl"
+                  className="w-full h-11 rounded-xl shadow-sm"
                   asChild
                 >
                   <Link href={`/r/${restaurantSlug}/menu`}>View Full Menu & Order</Link>
@@ -402,7 +408,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
 
                   {/* Reserve Button */}
                   <Button
-                    className="w-full h-14 rounded-xl text-lg"
+                    className="w-full h-11 md:h-12 rounded-xl text-sm md:text-base shadow-sm"
                     disabled={!selectedDate || !selectedTime}
                     onClick={handleReserve}
                   >
@@ -423,7 +429,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                 <CardContent className="p-6 space-y-4">
                   <h3 className="font-semibold text-lg">Order Online</h3>
                   <Button
-                    className="w-full h-12 rounded-xl gap-2"
+                    className="w-full h-11 rounded-xl gap-2 shadow-sm"
                     onClick={() => handleOrder('delivery')}
                   >
                     <Truck className="w-4 h-4" />
@@ -431,7 +437,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl gap-2"
+                    className="w-full h-11 rounded-xl gap-2"
                     onClick={() => handleOrder('pickup')}
                   >
                     <ShoppingBag className="w-4 h-4" />
@@ -449,7 +455,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                   </p>
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl"
+                    className="w-full h-11 rounded-xl"
                     onClick={() => setActiveTab('reserve')}
                   >
                     Check Availability

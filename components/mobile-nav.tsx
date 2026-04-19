@@ -33,7 +33,11 @@ export function MobileNav() {
   const navItems = isLoggedIn ? [...baseItems, ...loggedInItems] : guestItems
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+      role="navigation"
+      aria-label="Bottom navigation"
+    >
       {/* Curved background shape */}
       <div className="relative">
         <svg
@@ -45,7 +49,7 @@ export function MobileNav() {
         </svg>
         
         {/* Navigation items */}
-        <div className="absolute inset-0 flex items-center justify-around px-4 pt-2">
+        <div className="absolute inset-0 flex items-center justify-around px-4 pt-2 pb-[max(env(safe-area-inset-bottom),0px)]">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             
@@ -54,12 +58,16 @@ export function MobileNav() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
                   className="relative -mt-8"
                 >
                   <div className={cn(
-                    'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 bg-primary'
+                    'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-95 bg-primary'
                   )}>
                     <item.icon className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div className="mt-1 text-[11px] font-medium text-center text-muted-foreground">
+                    {item.label}
                   </div>
                 </Link>
               )
@@ -69,12 +77,16 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-label={item.label}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 transition-colors py-2',
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  'flex flex-col items-center justify-center gap-1 transition-colors py-2 min-w-[64px]',
+                  isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
                 <item.icon className="w-5 h-5" />
+                <span className={cn('text-[11px] font-medium', isActive ? 'text-primary' : 'text-muted-foreground')}>
+                  {item.label}
+                </span>
               </Link>
             )
           })}

@@ -68,9 +68,13 @@ export function SiteHeader() {
         </Button>
 
         {/* Mobile Search Icon */}
-        <button className="md:hidden ml-auto p-2 rounded-lg hover:bg-muted">
+        <Link
+          href="/search"
+          aria-label="Search restaurants"
+          className="md:hidden ml-auto inline-flex items-center justify-center p-2 rounded-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
           <Search className="w-5 h-5" />
-        </button>
+        </Link>
 
         {/* Login / User Menu */}
         <DropdownMenu>

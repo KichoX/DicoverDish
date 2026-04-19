@@ -64,7 +64,10 @@ export function RestaurantCard({ restaurant, variant = 'default' }: RestaurantCa
                 e.stopPropagation()
                 setIsFavorite(!isFavorite)
               }}
-              className="absolute top-1.5 right-1.5 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm"
+              type="button"
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              aria-pressed={isFavorite}
+              className="absolute top-1.5 right-1.5 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 after:absolute after:-inset-2"
             >
               <Heart
                 className={cn(
@@ -156,7 +159,10 @@ export function RestaurantCard({ restaurant, variant = 'default' }: RestaurantCa
                 e.stopPropagation()
                 setIsFavorite(!isFavorite)
               }}
-              className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+              type="button"
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              aria-pressed={isFavorite}
+              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 after:absolute after:-inset-2"
             >
               <Heart
                 className={cn(
