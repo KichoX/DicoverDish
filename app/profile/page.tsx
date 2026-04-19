@@ -19,7 +19,6 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { AppShell } from '@/components/app-shell'
 import { useAppStore } from '@/lib/store'
 
@@ -158,28 +157,26 @@ export default function ProfilePage() {
           </Card>
 
           {/* Menu Items */}
-          <Card>
-            <CardContent className="p-0">
-              {menuItems.map((item, index) => (
-                <div key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-5 h-5 text-muted-foreground" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {menuItems.map((item) => (
+              <Link key={item.label} href={item.href} className="block">
+                <Card className="h-full rounded-2xl border-border/60 hover:shadow-md transition-all">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                        <item.icon className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium leading-tight">{item.label}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium">{item.label}</p>
-                      <p className="text-sm text-muted-foreground truncate">{item.description}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                  </Link>
-                  {index < menuItems.length - 1 && <Separator />}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
 
           {/* Logout Button */}
           <Button

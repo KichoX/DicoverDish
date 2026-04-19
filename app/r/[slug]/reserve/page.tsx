@@ -4,7 +4,7 @@ import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { 
-  ArrowLeft, Calendar, Users, Check, ChevronLeft, ChevronRight
+  ArrowLeft, Calendar, Users, Check
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -165,7 +165,7 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
     <div className="min-h-screen bg-card">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-card border-b border-border">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href={`/r/${slug}`}
@@ -183,7 +183,25 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-6 pb-32">
+      <main className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-32 md:pb-10">
+        {step !== 'success' && (
+          <div className="hidden md:flex items-center gap-3 mb-6">
+            <div className={cn(
+              'h-8 px-3 rounded-full text-xs font-medium inline-flex items-center',
+              step === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            )}>
+              1. Choose table
+            </div>
+            <div className="h-px w-8 bg-border" />
+            <div className={cn(
+              'h-8 px-3 rounded-full text-xs font-medium inline-flex items-center',
+              step === 'details' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            )}>
+              2. Your details
+            </div>
+          </div>
+        )}
+
         {/* Reservation Summary Bar */}
         {step !== 'success' && (
           <Card className="mb-6">
@@ -215,8 +233,8 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
 
         {/* Step 1: Table Selection */}
         {step === 'table' && (
-          <div className="space-y-6">
-            <h1 className="font-serif text-3xl italic">Choose table</h1>
+          <div className="space-y-6 md:space-y-7">
+            <h1 className="font-serif text-3xl md:text-[2.15rem] italic">Choose table</h1>
 
             {/* Section Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -225,10 +243,10 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                   key={section}
                   onClick={() => setSelectedSection(section)}
                   className={cn(
-                    'px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-colors flex items-center gap-2',
+                    'px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all flex items-center gap-2',
                     selectedSection === section
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-border hover:border-primary/50'
+                      ? 'bg-primary/10 text-primary border-primary/30'
+                      : 'border-border hover:border-primary/40 hover:bg-muted/40'
                   )}
                 >
                   {section === 'Garden' && '🌿'}
@@ -240,7 +258,7 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Floor Plan */}
-            <div className="bg-muted/30 rounded-2xl p-6 min-h-[300px]">
+            <div className="bg-muted/30 rounded-2xl p-5 md:p-7 min-h-[300px] md:min-h-[360px]">
               <div className="flex flex-wrap gap-6 justify-center items-center">
                 {filteredTables.length > 0 ? (
                   filteredTables.map((table) => renderTableWithSeats(table))
@@ -269,13 +287,24 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                 </CardContent>
               </Card>
             )}
+
+            <div className="hidden md:flex items-center justify-end gap-3 pt-1">
+              <Button
+                className="h-11 px-6 rounded-xl text-sm"
+                onClick={() => setStep('details')}
+              >
+                {selectedTable
+                  ? 'Continue with selected table'
+                  : 'Continue without table preference'}
+              </Button>
+            </div>
           </div>
         )}
 
         {/* Step 2: Details */}
         {step === 'details' && (
-          <div className="space-y-6">
-            <h1 className="font-serif text-3xl italic">Your details</h1>
+          <div className="space-y-6 md:space-y-7">
+            <h1 className="font-serif text-3xl md:text-[2.15rem] italic">Your details</h1>
 
             {/* Contact Details */}
             <FieldGroup>
@@ -286,10 +315,10 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                   placeholder="Enter your full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="h-12 rounded-xl"
+                  className="h-11 md:h-10 rounded-xl"
                 />
               </Field>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel htmlFor="phone">Phone *</FieldLabel>
                   <Input
@@ -298,7 +327,7 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                     placeholder="+1 555 123 4567"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="h-12 rounded-xl"
+                    className="h-11 md:h-10 rounded-xl"
                   />
                 </Field>
                 <Field>
@@ -309,7 +338,7 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 rounded-xl"
+                    className="h-11 md:h-10 rounded-xl"
                   />
                 </Field>
               </div>
@@ -320,10 +349,29 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
                   placeholder="Any dietary requirements or special occasions?"
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
-                  className="h-12 rounded-xl"
+                  className="h-11 md:h-10 rounded-xl"
                 />
               </Field>
             </FieldGroup>
+
+            <div className="hidden md:flex items-center justify-between gap-3 pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 px-5 rounded-xl text-sm"
+                onClick={() => setStep('table')}
+              >
+                Back
+              </Button>
+              <Button
+                type="button"
+                className="h-11 px-6 rounded-xl text-sm"
+                disabled={!name || !phone}
+                onClick={handleConfirmReservation}
+              >
+                Confirm reservation
+              </Button>
+            </div>
           </div>
         )}
 
@@ -374,11 +422,11 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
               </CardContent>
             </Card>
 
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-xl h-12" asChild>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" className="flex-1 rounded-xl h-11" asChild>
                 <Link href={`/r/${slug}`}>Back to Restaurant</Link>
               </Button>
-              <Button className="flex-1 rounded-xl h-12" asChild>
+              <Button className="flex-1 rounded-xl h-11" asChild>
                 <Link href="/">Discover More</Link>
               </Button>
             </div>
@@ -386,20 +434,20 @@ export default function ReservePage({ params }: { params: Promise<{ slug: string
         )}
       </main>
 
-      {/* Fixed Bottom Button */}
+      {/* Fixed Bottom Button (Mobile only) */}
       {step !== 'success' && (
-        <div className="fixed bottom-0 left-0 right-0">
-          <div className="bg-primary rounded-t-[2rem]">
+        <div className="fixed bottom-0 left-0 right-0 md:hidden">
+          <div className="bg-primary rounded-t-[1.5rem] shadow-[0_-8px_24px_rgba(0,0,0,0.18)]">
             <div className="max-w-lg mx-auto">
               <Button
-                className="w-full h-14 text-lg bg-transparent hover:bg-transparent text-primary-foreground"
+                className="w-full h-13 text-base bg-transparent hover:bg-transparent text-primary-foreground"
                 disabled={step === 'details' && (!name || !phone)}
                 onClick={() => {
                   if (step === 'table') setStep('details')
                   else if (step === 'details') handleConfirmReservation()
                 }}
               >
-                {step === 'table' && (selectedTable ? 'Continue with Table ' + tables.find(t => t.id === selectedTable)?.number : 'Skip table selection')}
+                {step === 'table' && (selectedTable ? 'Continue with table ' + tables.find(t => t.id === selectedTable)?.number : 'Continue without table')}
                 {step === 'details' && 'Confirm Reservation'}
               </Button>
             </div>
