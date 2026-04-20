@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  Clock, MapPin, Globe, Instagram, Facebook, Phone, Mail, 
+import {
+  Clock, MapPin, Globe, Instagram, Facebook, Phone, Mail,
   PawPrint, Cigarette, Baby, Wifi, CreditCard, Utensils,
-  Save, LogOut, User
+  Save, User, DollarSign,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,11 +24,25 @@ import {
 import { cn } from '@/lib/utils'
 
 // Mock restaurant data - would come from database in production
+const currencies = [
+  { code: 'USD', symbol: '$', label: 'USD — US Dollar' },
+  { code: 'EUR', symbol: '€', label: 'EUR — Euro' },
+  { code: 'GBP', symbol: '£', label: 'GBP — British Pound' },
+  { code: 'CHF', symbol: 'Fr.', label: 'CHF — Swiss Franc' },
+  { code: 'SEK', symbol: 'kr', label: 'SEK — Swedish Krona' },
+  { code: 'NOK', symbol: 'kr', label: 'NOK — Norwegian Krone' },
+  { code: 'DKK', symbol: 'kr', label: 'DKK — Danish Krone' },
+  { code: 'JPY', symbol: '¥', label: 'JPY — Japanese Yen' },
+  { code: 'CAD', symbol: 'CA$', label: 'CAD — Canadian Dollar' },
+  { code: 'AUD', symbol: 'A$', label: 'AUD — Australian Dollar' },
+]
+
 const initialSettings = {
   name: 'Le Loup Imperial',
   description: 'Fine French dining in the heart of Hamburg. Our chef creates exquisite dishes using the freshest local ingredients, paired with an extensive wine collection.',
   cuisineType: 'French',
   priceRange: '$$$$',
+  currency: 'USD',
   address: 'Neuer Wall 25, 20354 Hamburg',
   phone: '+49 40 123 4567',
   email: 'reservations@leloupimperial.de',
@@ -205,7 +219,7 @@ export default function AdminSettingsPage() {
 
                 <Field>
                   <FieldLabel>Price Range</FieldLabel>
-                  <Select 
+                  <Select
                     value={settings.priceRange}
                     onValueChange={(value) => setSettings({ ...settings, priceRange: value })}
                   >
@@ -220,6 +234,29 @@ export default function AdminSettingsPage() {
                   </Select>
                 </Field>
               </div>
+
+              <Field>
+                <FieldLabel>
+                  <DollarSign className="w-4 h-4 inline mr-1.5" />
+                  Currency
+                </FieldLabel>
+                <Select
+                  value={settings.currency}
+                  onValueChange={(value) => setSettings({ ...settings, currency: value })}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        <span className="font-mono w-8 inline-block text-muted-foreground">{c.symbol}</span>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
             </CardContent>
           </Card>
 
@@ -448,19 +485,6 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Logout Section */}
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="text-destructive">Account</CardTitle>
-              <CardDescription>Manage your admin account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="destructive" className="rounded-xl">
-                <LogOut className="w-4 h-4 mr-2" />
-                Log Out
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       )}
     </div>
