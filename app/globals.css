@@ -168,3 +168,24 @@
 .btn-glow-green {
   animation: glow-green 2s ease-in-out infinite;
 }
+
+/* Menu: Pokemon-style card grow/shrink */
+@keyframes card-grow {
+  from { opacity: 0; transform: scale(0.45); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes card-shrink {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.45); }
+}
+.card-grow-anim   { animation: card-grow   0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.card-shrink-anim { animation: card-shrink 0.18s ease-in forwards; }
+
+/* FAB bounce when item lands */
+@keyframes fab-bounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.32); }
+  65%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.fab-bounce { animation: fab-bounce 0.45s ease-out; }
