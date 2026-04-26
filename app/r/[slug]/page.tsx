@@ -3,15 +3,17 @@
 import { use } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { 
-  Star, Clock, MapPin, Phone, Globe, Instagram, 
-  Calendar, ShoppingBag, Truck, Share2, ExternalLink
+import { useRouter } from 'next/navigation'
+import {
+  Star, Clock, MapPin, Phone, Globe, Instagram,
+  Calendar, ShoppingBag, Truck, Share2, ExternalLink, Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { restaurants } from '@/lib/data'
+import { restaurants, menuItems } from '@/lib/data'
+import { useAppStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 import { Footer } from '@/components/footer'
 
@@ -22,7 +24,9 @@ function generateSlug(name: string): string {
 
 export default function RestaurantMicrosite({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
-  
+  const router = useRouter()
+  const { addToCart, setCurrentRestaurantId } = useAppStore()
+
   // Find restaurant by slug
   const restaurant = restaurants.find((r) => generateSlug(r.name) === slug)
 
@@ -38,6 +42,17 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
         </div>
       </div>
     )
+  }
+
+  const restaurantMenuItems = menuItems.filter((item) =>
+    item.restaurantId ? item.restaurantId === restaurant.id : restaurant.id !== '9'
+  )
+  const featuredItems = restaurantMenuItems.filter((i) => i.isAvailable && i.image).slice(0, 4)
+
+  const handleQuickAdd = (item: typeof menuItems[0]) => {
+    setCurrentRestaurantId(restaurant.id)
+    addToCart({ ...item, quantity: 1 })
+    router.push(`/r/${slug}/menu`)
   }
 
   const handleShare = async () => {
@@ -131,6 +146,35 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
           </Card>
         </div>
 
+        {/* Featured Menu Items */}
+        {featuredItems.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg">Popular Dishes</h3>
+              <Link href={`/r/${slug}/menu`} className="text-sm text-primary hover:underline">View full menu</Link>
+            </div>
+            <div className="space-y-2">
+              {featuredItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 bg-card rounded-2xl border border-border/60 p-3">
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
+                    {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm line-clamp-1">{item.name}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span className="font-bold text-sm">${item.price.toFixed(2)}</span>
+                    <Button size="sm" className="h-7 px-3 text-xs rounded-full gap-1" onClick={() => handleQuickAdd(item)}>
+                      <Plus className="w-3 h-3" />Add
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Info Cards */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           {/* About Card */}
@@ -172,28 +216,43 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
               </div>
               <Separator />
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2">
-                  <Phone className="w-4 h-4" />
-                  Call
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2">
-                  <Globe className="w-4 h-4" />
-                  Website
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2">
-                  <Instagram className="w-4 h-4" />
-                  Instagram
-                </Button>
+                {restaurant.phone ? (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" asChild>
+                    <a href={`tel:${restaurant.phone}`}><Phone className="w-4 h-4" />Call</a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" disabled>
+                    <Phone className="w-4 h-4" />Call
+                  </Button>
+                )}
+                {restaurant.website ? (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" asChild>
+                    <a href={restaurant.website} target="_blank" rel="noopener noreferrer"><Globe className="w-4 h-4" />Website</a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" disabled>
+                    <Globe className="w-4 h-4" />Website
+                  </Button>
+                )}
+                {restaurant.instagram ? (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" asChild>
+                    <a href={restaurant.instagram} target="_blank" rel="noopener noreferrer"><Instagram className="w-4 h-4" />Instagram</a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full gap-2" disabled>
+                    <Instagram className="w-4 h-4" />Instagram
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Test QR Code Section - Only for Le Loup Imperial */}
-        {restaurant.id === '1' && (
-          <Card className="border-dashed">
+        {/* QR Code demo — shown for Ristorante Matera */}
+        {restaurant.id === '9' && (
+          <Card className="border-dashed mb-4">
             <CardContent className="p-5 text-center">
-              <p className="text-sm text-muted-foreground mb-3">Test QR Code Link (Table 5)</p>
+              <p className="text-sm text-muted-foreground mb-3">Scan QR Code at your table (Table 5 demo)</p>
               <Link href={`/r/${slug}/dine-in/table-5`}>
                 <Button variant="outline" className="rounded-xl">
                   Scan QR Code (Demo)
@@ -202,6 +261,15 @@ export default function RestaurantMicrosite({ params }: { params: Promise<{ slug
             </CardContent>
           </Card>
         )}
+
+        {/* Discover more CTA */}
+        <div className="rounded-2xl bg-primary/5 border border-primary/15 px-6 py-8 text-center">
+          <h3 className="font-serif text-xl italic mb-1">Hungry for more?</h3>
+          <p className="text-sm text-muted-foreground mb-4">Discover great restaurants near you</p>
+          <Button asChild className="rounded-full px-6">
+            <Link href="/">Explore Restaurants</Link>
+          </Button>
+        </div>
 
       </div>
     </div>

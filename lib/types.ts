@@ -9,10 +9,14 @@ export interface Restaurant {
   hours: string
   address: string
   description?: string
+  phone?: string
+  website?: string
+  instagram?: string
 }
 
 export interface MenuItem {
   id: string
+  restaurantId?: string
   name: string
   description: string
   price: number

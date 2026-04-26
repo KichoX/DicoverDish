@@ -7,14 +7,14 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, Plus, Minus, ShoppingBag, Truck, ShoppingCart,
-  Trash2, Check, Star, Info, X, Utensils,
+  Trash2, Check, Star, Info, X, Utensils, Leaf, Fish, Wine, Cookie,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-import { restaurants, menuItems, menuCategories } from '@/lib/data'
+import { restaurants, menuItems, restaurantMenuCategories } from '@/lib/data'
 import { useAppStore } from '@/lib/store'
 import type { CartItem } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -24,19 +24,31 @@ function generateSlug(name: string): string {
 }
 
 const mockIngredients: Record<string, string[]> = {
-  'Starters':     ['Fresh greens', 'Cherry tomatoes', 'Extra virgin olive oil', 'Sea salt', 'Lemon zest'],
-  'Main Courses': ['Premium protein', 'Seasonal vegetables', 'Fresh herbs', 'House sauce', 'Artisan grains'],
-  'Pizza':        ['Hand-stretched dough', 'San Marzano tomato', 'Fior di latte', 'Fresh basil', 'EVOO'],
-  'Desserts':     ['Organic flour', 'Cane sugar', 'French butter', 'Free-range eggs', 'Vanilla'],
-  'Drinks':       ['Filtered water', 'Natural extracts', 'Fresh citrus', 'Seasonal herbs'],
+  'Starters':        ['Fresh greens', 'Cherry tomatoes', 'Extra virgin olive oil', 'Sea salt', 'Lemon zest'],
+  'Main Courses':    ['Premium protein', 'Seasonal vegetables', 'Fresh herbs', 'House sauce', 'Artisan grains'],
+  'Pizza':           ['Hand-stretched dough', 'San Marzano tomato', 'Fior di latte', 'Fresh basil', 'EVOO'],
+  'Desserts':        ['Mascarpone', 'Cane sugar', 'Free-range eggs', 'Vanilla', 'Seasonal fruit'],
+  'Drinks':          ['Filtered water', 'Natural extracts', 'Fresh citrus', 'Seasonal herbs'],
+  'Salads':          ['Mixed leaves', 'Cherry tomatoes', 'Extra virgin olive oil', 'Lemon', 'Sea salt'],
+  'Soups':           ['Seasonal vegetables', 'Vegetable stock', 'Extra virgin olive oil', 'Fresh herbs', 'Sea salt'],
+  'Pasta':           ['Durum wheat pasta', 'Extra virgin olive oil', 'Fresh herbs', 'Garlic', 'Parmigiano-Reggiano'],
+  'Handmade Pasta':  ['00 flour', 'Free-range eggs', 'Semolina', 'Sea salt', 'Extra virgin olive oil'],
+  'Meat':            ['Prime beef or pork', 'Fresh herbs', 'Garlic', 'White wine', 'Seasonal vegetables'],
+  'Fish':            ['Fresh catch of the day', 'Lemon', 'Capers', 'White wine', 'Extra virgin olive oil'],
 }
 
 const mockNutrition: Record<string, { cal: number; protein: string; carbs: string; fat: string }> = {
-  'Starters':     { cal: 180, protein: '8g',  carbs: '22g', fat: '7g'  },
-  'Main Courses': { cal: 520, protein: '38g', carbs: '45g', fat: '18g' },
-  'Pizza':        { cal: 680, protein: '28g', carbs: '82g', fat: '24g' },
-  'Desserts':     { cal: 340, protein: '5g',  carbs: '52g', fat: '14g' },
-  'Drinks':       { cal: 95,  protein: '0g',  carbs: '24g', fat: '0g'  },
+  'Starters':       { cal: 290,  protein: '14g', carbs: '18g', fat: '18g' },
+  'Main Courses':   { cal: 520,  protein: '38g', carbs: '45g', fat: '18g' },
+  'Pizza':          { cal: 750,  protein: '28g', carbs: '90g', fat: '24g' },
+  'Desserts':       { cal: 370,  protein: '7g',  carbs: '46g', fat: '18g' },
+  'Drinks':         { cal: 95,   protein: '0g',  carbs: '24g', fat: '0g'  },
+  'Salads':         { cal: 175,  protein: '7g',  carbs: '12g', fat: '12g' },
+  'Soups':          { cal: 145,  protein: '5g',  carbs: '20g', fat: '5g'  },
+  'Pasta':          { cal: 620,  protein: '22g', carbs: '80g', fat: '18g' },
+  'Handmade Pasta': { cal: 680,  protein: '24g', carbs: '82g', fat: '22g' },
+  'Meat':           { cal: 490,  protein: '44g', carbs: '6g',  fat: '30g' },
+  'Fish':           { cal: 370,  protein: '36g', carbs: '10g', fat: '18g' },
 }
 
 // ── Fly-to-cart particle ─────────────────────────────────────────────
@@ -81,6 +93,27 @@ function FlyParticle({
   )
 }
 
+const categoryIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Starters': Utensils, 'Main Courses': Utensils,
+  'Salads': Leaf, 'Soups': Utensils, 'Pizza': Utensils,
+  'Pasta': Utensils, 'Handmade Pasta': Utensils,
+  'Meat': Utensils, 'Fish': Fish,
+  'Desserts': Cookie, 'Drinks': Wine,
+}
+const categoryGradient: Record<string, string> = {
+  'Starters':       'linear-gradient(135deg,#f97316,#ea580c)',
+  'Salads':         'linear-gradient(135deg,#4ade80,#16a34a)',
+  'Soups':          'linear-gradient(135deg,#fbbf24,#d97706)',
+  'Pizza':          'linear-gradient(135deg,#f87171,#dc2626)',
+  'Pasta':          'linear-gradient(135deg,#facc15,#ca8a04)',
+  'Handmade Pasta': 'linear-gradient(135deg,#fb923c,#ea580c)',
+  'Main Courses':   'linear-gradient(135deg,#94a3b8,#475569)',
+  'Meat':           'linear-gradient(135deg,#f43f5e,#be123c)',
+  'Fish':           'linear-gradient(135deg,#60a5fa,#2563eb)',
+  'Desserts':       'linear-gradient(135deg,#f472b6,#db2777)',
+  'Drinks':         'linear-gradient(135deg,#a78bfa,#7c3aed)',
+}
+
 // ── Menu item card ───────────────────────────────────────────────────
 function MenuItemCard({
   item,
@@ -106,9 +139,11 @@ function MenuItemCard({
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const src        = item.image || fallbackImage
-  const nutrition  = mockNutrition[item.category]   ?? mockNutrition['Main Courses']
+  const src         = item.image || fallbackImage
+  const nutrition   = mockNutrition[item.category]   ?? mockNutrition['Main Courses']
   const ingredients = mockIngredients[item.category] ?? mockIngredients['Main Courses']
+  const CategoryIconComp = categoryIconMap[item.category] ?? Utensils
+  const gradient    = categoryGradient[item.category] ?? categoryGradient['Main Courses']
 
   const handleInfoClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -154,7 +189,13 @@ function MenuItemCard({
           {/* Front face */}
           <div className="flip-face rounded-2xl overflow-hidden bg-card flex flex-col">
             <div className="relative flex-1 bg-muted">
-              <Image src={src} alt={item.name} fill className="object-cover" />
+              {src ? (
+                <Image src={src} alt={item.name} fill className="object-cover" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
+                  <CategoryIconComp className="w-14 h-14 text-white/80" />
+                </div>
+              )}
               {unavailable && (
                 <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
                   <Badge variant="secondary">Unavailable</Badge>
@@ -253,7 +294,13 @@ function MenuItemCard({
         )}
       >
         <div className="relative w-full bg-muted" style={{ paddingBottom: '65%' }}>
-          <Image src={src} alt={item.name} fill className="object-cover absolute inset-0" />
+          {src ? (
+            <Image src={src} alt={item.name} fill className="object-cover absolute inset-0" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
+              <CategoryIconComp className="w-14 h-14 text-white/80" />
+            </div>
+          )}
           {unavailable && (
             <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
               <Badge variant="secondary">Unavailable</Badge>
@@ -297,7 +344,13 @@ function MenuItemCard({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative h-44">
-              <Image src={src} alt={item.name} fill className="object-cover" />
+              {src ? (
+                <Image src={src} alt={item.name} fill className="object-cover" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
+                  <CategoryIconComp className="w-16 h-16 text-white/80" />
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
               <button
                 onClick={handleMobileClose}
@@ -601,7 +654,8 @@ function MenuPageInner({ slug }: { slug: string }) {
   const [cartOpen,     setCartOpen]     = useState(false)
   const [checkingOut,  setCheckingOut]  = useState(false)
   const [itemNotes,    setItemNotes]    = useState<Record<string, string>>({})
-  const [selectedCategory, setSelectedCategory] = useState(menuCategories[0])
+  const restaurantCategories = restaurantMenuCategories[restaurant?.id ?? ''] ?? restaurantMenuCategories.default
+  const [selectedCategory, setSelectedCategory] = useState(restaurantCategories[0])
 
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('pickup')
   const [address,    setAddress]    = useState('')
@@ -632,7 +686,11 @@ function MenuPageInner({ slug }: { slug: string }) {
     )
   }
 
-  const categoryItems  = menuItems.filter((item) => item.category === selectedCategory)
+  const restaurantMenuItems = menuItems.filter((item) =>
+    item.restaurantId ? item.restaurantId === restaurant.id : restaurant.id !== '9'
+  )
+  const categories = restaurantMenuCategories[restaurant.id] ?? restaurantMenuCategories.default
+  const categoryItems = restaurantMenuItems.filter((item) => item.category === selectedCategory)
   const cartItemCount  = cart.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal       = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const deliveryFee    = !isDineIn && deliveryMethod === 'delivery' ? 3.99 : 0
@@ -787,7 +845,7 @@ function MenuPageInner({ slug }: { slug: string }) {
               {/* Category tabs */}
               <div className="mb-5">
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 lg:flex-wrap lg:justify-center">
-                  {menuCategories.map((category) => (
+                  {categories.map((category) => (
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}

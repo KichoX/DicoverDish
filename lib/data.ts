@@ -97,6 +97,21 @@ export const restaurants: Restaurant[] = [
     address: 'Steindamm 54',
     description: 'Authentic Cantonese and Sichuan cuisine with dim sum brunch.',
   },
+  {
+    id: '9',
+    name: 'Ristorante Matera',
+    image: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?w=1200&h=600&fit=crop',
+    rating: 4.7,
+    cuisines: ['Italian', 'Pizza'],
+    tags: ['Wood-fired oven', 'Outdoor seating', 'Delivery'],
+    isOpen: true,
+    hours: '12:00PM - 12:00AM',
+    address: 'Birkbuschstraße 7, 12165 Berlin-Steglitz',
+    description: 'Authentic Italian restaurant in the heart of Berlin-Steglitz, celebrated for stone-oven pizzas baked to perfection and handmade pasta. A warm Mediterranean atmosphere with over 20 years of tradition.',
+    phone: '+493060927677',
+    website: 'https://www.restaurant-matera.de',
+    instagram: 'https://www.instagram.com/ristorantematera',
+  },
 ]
 
 export const menuItems: MenuItem[] = [
@@ -224,6 +239,91 @@ export const menuItems: MenuItem[] = [
     category: 'Drinks',
     isAvailable: true,
   },
+
+  // ── Ristorante Matera (id: '9') — full accurate menu ────────────
+  // Antipasti / Starters
+  { id: 'mr1',  restaurantId: '9', name: 'Antipasto Misto',       category: 'Starters', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=400&h=300&fit=crop', description: 'Mixed Italian cold cuts, marinated olives, grilled peppers and sun-dried tomatoes — a taste of the house' },
+  { id: 'mr2',  restaurantId: '9', name: 'Caprese con Mozzarella', category: 'Starters', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=400&h=300&fit=crop', description: 'Fresh mozzarella slices layered with vine tomatoes and fragrant basil, finished with extra virgin olive oil' },
+  { id: 'mr3',  restaurantId: '9', name: 'Vitello Tonnato',        category: 'Starters', price: 13.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1574484284002-952d92a03a52?w=400&h=300&fit=crop', description: 'Thinly sliced roasted veal with a creamy tuna sauce, capers and fresh parsley' },
+  { id: 'mr4',  restaurantId: '9', name: 'Carpaccio di Manzo',    category: 'Starters', price: 14.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=400&h=300&fit=crop', description: 'Beef tenderloin carpaccio with lemon vinaigrette, fresh champignons, rocket and shaved Parmigiano-Reggiano' },
+  { id: 'mr5',  restaurantId: '9', name: 'Prosciutto e Melone',   category: 'Starters', price: 12.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=300&fit=crop', description: 'Delicate San Daniele Parma ham draped over ripe, sweet cantaloupe melon' },
+  { id: 'mr6',  restaurantId: '9', name: 'Bruschetta (4 pcs)',    category: 'Starters', price: 6.50,  isAvailable: true, image: 'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=400&h=300&fit=crop', description: '2× toasted sourdough with fresh tomatoes and basil · 2× with tuna and red onion, drizzled with olive oil' },
+
+  // Insalate / Salads
+  { id: 'mr7',  restaurantId: '9', name: 'Insalata Mista',        category: 'Salads', price: 6.50,  isAvailable: true, image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=300&fit=crop', description: 'Seasonal mixed leaves with house vinaigrette' },
+  { id: 'mr8',  restaurantId: '9', name: 'Insalata di Rucola',    category: 'Salads', price: 11.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop', description: 'Rocket salad with cherry tomatoes and shaved Parmigiano, dressed with lemon and extra virgin olive oil' },
+  { id: 'mr9',  restaurantId: '9', name: 'Insalata di Tonno',     category: 'Salads', price: 11.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop', description: 'Mixed seasonal salad topped with premium tuna, olives and red onion' },
+  { id: 'mr10', restaurantId: '9', name: 'Insalata di Pollo',     category: 'Salads', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=400&h=300&fit=crop', description: 'Mixed salad with grilled chicken breast strips, cherry tomatoes and light cream dressing' },
+  { id: 'mr11', restaurantId: '9', name: 'Insalata Matera',       category: 'Salads', price: 13.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop', description: 'Mixed salad with Parma ham, soft-boiled egg, cherry tomatoes and house dressing — the signature salad' },
+
+  // Zuppe / Soups
+  { id: 'mr12', restaurantId: '9', name: 'Zuppa di Pomodoro',     category: 'Soups', price: 6.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop', description: 'Velvety cream of tomato soup with fresh basil oil and a drizzle of extra virgin olive oil' },
+  { id: 'mr13', restaurantId: '9', name: 'Minestrone',            category: 'Soups', price: 6.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=400&h=300&fit=crop', description: 'Hearty fresh vegetable soup with seasonal produce, cannellini beans and a Parmigiano rind' },
+
+  // Pizze / Pizza
+  { id: 'mr14', restaurantId: '9', name: 'Focaccia',              category: 'Pizza', price: 6.50,  isAvailable: true, image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=300&fit=crop', description: 'Stone-oven baked flatbread with fresh rosemary, coarse sea salt and extra virgin olive oil' },
+  { id: 'mr15', restaurantId: '9', name: 'Margherita',            category: 'Pizza', price: 9.00,  isAvailable: true, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop', description: 'San Marzano tomato, fior di latte mozzarella and fresh basil — the Italian classic, stone-oven baked' },
+  { id: 'mr16', restaurantId: '9', name: 'Salame',                category: 'Pizza', price: 11.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella and Italian salami, stone-oven baked to a perfectly crisp crust' },
+  { id: 'mr17', restaurantId: '9', name: 'Vegetale',              category: 'Pizza', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella and a seasonal medley of fresh market vegetables from the region' },
+  { id: 'mr18', restaurantId: '9', name: 'Calabrese',             category: 'Pizza', price: 13.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella and fiery spicy Italian salami from Calabria — for heat lovers' },
+  { id: 'mr19', restaurantId: '9', name: 'Tonno e Cipolla',       category: 'Pizza', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1548369937-47519962c11a?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella, premium tuna and sweet red onion — a Neapolitan favourite' },
+  { id: 'mr20', restaurantId: '9', name: 'Matera',                category: 'Pizza', price: 14.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella, San Daniele Parma ham, fresh rocket and shaved Parmigiano — our signature pizza' },
+  { id: 'mr21', restaurantId: '9', name: 'Scampi',                category: 'Pizza', price: 15.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop', description: 'Tomato sauce, mozzarella and whole king prawns, finished with garlic and flat-leaf parsley' },
+  { id: 'mr22', restaurantId: '9', name: 'Spinaci',               category: 'Pizza', price: 13.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&h=300&fit=crop', description: 'Creamy Gorgonzola, baby spinach and toasted walnuts — a rich and earthy combination' },
+  { id: 'mr23', restaurantId: '9', name: 'Pizza Mista',           category: 'Pizza', price: 14.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop', description: 'The works: salami, cooked ham, mushrooms and peperoni on tomato and mozzarella' },
+
+  // Paste / Pasta
+  { id: 'mr24', restaurantId: '9', name: 'Spaghetti Aglio e Olio',    category: 'Pasta', price: 11.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1473093226555-0b4e15c91b01?w=400&h=300&fit=crop', description: 'Spaghetti tossed in golden garlic-infused extra virgin olive oil with fresh chilli and flat-leaf parsley' },
+  { id: 'mr25', restaurantId: '9', name: 'Penne all\'Arrabbiata',      category: 'Pasta', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400&h=300&fit=crop', description: 'Penne in a fiery tomato and chilli sauce with olives — the name means "angry pasta" for good reason' },
+  { id: 'mr26', restaurantId: '9', name: 'Spaghetti Carbonara',        category: 'Pasta', price: 13.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&h=300&fit=crop', description: 'Classic Roman pasta with pancetta, egg yolks, cream, Parmigiano-Reggiano and freshly cracked black pepper' },
+  { id: 'mr27', restaurantId: '9', name: 'Spaghetti Napoli',           category: 'Pasta', price: 11.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1551183053-bf91798d3e5e?w=400&h=300&fit=crop', description: 'Spaghetti with San Marzano tomato fillets, garlic and fresh basil — Neapolitan simplicity at its finest' },
+  { id: 'mr28', restaurantId: '9', name: 'Spaghetti Bolognese',        category: 'Pasta', price: 13.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1551183053-bf91798d3e5e?w=400&h=300&fit=crop', description: 'Slow-cooked minced beef ragù in a rich San Marzano tomato sauce, simmered for hours' },
+  { id: 'mr29', restaurantId: '9', name: 'Gnocchi e Burro alla Salvia',category: 'Pasta', price: 12.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop', description: 'Pillowy potato gnocchi tossed in fragrant browned sage butter and Parmigiano' },
+  { id: 'mr30', restaurantId: '9', name: 'Tagliatelle al Salmone',     category: 'Pasta', price: 14.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop', description: 'Egg tagliatelle with diced Atlantic salmon in a silky lobster cream sauce' },
+  { id: 'mr31', restaurantId: '9', name: 'Penne Vegetale',             category: 'Pasta', price: 13.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop', description: 'Penne with a colourful sauté of fresh seasonal market vegetables in olive oil and garlic' },
+  { id: 'mr32', restaurantId: '9', name: 'Penne con Pollo',            category: 'Pasta', price: 13.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop', description: 'Penne with tender chicken breast strips and champignons in a light cream and white wine sauce' },
+  { id: 'mr33', restaurantId: '9', name: 'Tagliatelle dello Chef',     category: 'Pasta', price: 15.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&h=300&fit=crop', description: 'Chef\'s tagliatelle with beef tenderloin tips, courgette, fresh tomatoes and basil in a white wine sauce' },
+  { id: 'mr34', restaurantId: '9', name: 'Lasagne al Forno',           category: 'Pasta', price: 14.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=400&h=300&fit=crop', description: 'Homemade baked lasagne with slow-cooked Bolognese ragù, béchamel and Parmigiano — straight from the oven' },
+  { id: 'mr35', restaurantId: '9', name: 'Tagliatelle Pesto',          category: 'Pasta', price: 12.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1473093226555-0b4e15c91b01?w=400&h=300&fit=crop', description: 'Egg tagliatelle coated in a vibrant Genovese pesto of basil, pine nuts, garlic and Parmigiano' },
+  { id: 'mr36', restaurantId: '9', name: 'Penne Gorgonzola e Spinaci', category: 'Pasta', price: 13.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop', description: 'Penne with a creamy Gorgonzola sauce and wilted baby spinach — bold, rich and satisfying' },
+
+  // Hausgemachte Pasta / Handmade Pasta
+  { id: 'mr37', restaurantId: '9', name: 'Ravioli Ricotta e Spinaci',   category: 'Handmade Pasta', price: 16.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400&h=300&fit=crop', description: 'House-made ravioli filled with ricotta and spinach, served in a light San Marzano tomato sauce' },
+  { id: 'mr38', restaurantId: '9', name: 'Ravioli Verde al Manzo',      category: 'Handmade Pasta', price: 17.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400&h=300&fit=crop', description: 'House-made green (spinach-dough) ravioli stuffed with minced beef and leek in a light meat ragù' },
+  { id: 'mr39', restaurantId: '9', name: 'Ravioli alle Castagne',       category: 'Handmade Pasta', price: 17.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400&h=300&fit=crop', description: 'House-made ravioli filled with chestnut purée, served in a classic sage brown butter sauce' },
+  { id: 'mr40', restaurantId: '9', name: 'Ravioli ai Funghi Porcini',   category: 'Handmade Pasta', price: 17.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400&h=300&fit=crop', description: 'House-made ravioli filled with wild porcini mushrooms, served in a rich porcini cream sauce' },
+  { id: 'mr41', restaurantId: '9', name: 'Ravioli Neri al Pesce',       category: 'Handmade Pasta', price: 18.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400&h=300&fit=crop', description: 'House-made squid-ink black ravioli filled with fresh fish, in a delicate lobster bisque sauce' },
+  { id: 'mr42', restaurantId: '9', name: 'Linguine Nere ai Granchi',    category: 'Handmade Pasta', price: 17.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400&h=300&fit=crop', description: 'House-made squid-ink black linguine with crab meat and courgette in a light tomato sauce' },
+  { id: 'mr43', restaurantId: '9', name: 'Cannelloni Ricotta e Spinaci',category: 'Handmade Pasta', price: 16.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=400&h=300&fit=crop', description: 'House-made cannelloni filled with ricotta and spinach, oven-baked under a blanket of béchamel and tomato' },
+  { id: 'mr44', restaurantId: '9', name: 'Ravioli Misto (for 2)',       category: 'Handmade Pasta', price: 38.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400&h=300&fit=crop', description: 'A generous mixed selection of all house-made ravioli varieties — the perfect sharing feast for two' },
+
+  // Carne / Meat
+  { id: 'mr45', restaurantId: '9', name: 'Medaglioni alla Boscaiola',   category: 'Meat', price: 22.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop', description: 'Pork fillet medallions with a sauté of seasonal wild mushrooms in a light cream and white wine sauce' },
+  { id: 'mr46', restaurantId: '9', name: 'Filetto di Manzo',            category: 'Meat', price: 29.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1546833998-877b37c2e5c6?w=400&h=300&fit=crop', description: 'Premium grilled beef tenderloin, served with seasonal vegetables and your choice of sauce' },
+  { id: 'mr47', restaurantId: '9', name: 'Filetto di Manzo al Pepe Verde', category: 'Meat', price: 31.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1546833998-877b37c2e5c6?w=400&h=300&fit=crop', description: 'Beef tenderloin in a fragrant green peppercorn and cognac cream sauce — rich and deeply flavoured' },
+  { id: 'mr48', restaurantId: '9', name: 'Saltimbocca alla Romana',     category: 'Meat', price: 22.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop', description: 'Pork fillet medallions wrapped in Parma ham and fresh sage, pan-cooked in white wine — a Roman classic' },
+  { id: 'mr49', restaurantId: '9', name: 'Bistecca alla Gorgonzola',    category: 'Meat', price: 25.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=300&fit=crop', description: 'Grilled rump steak topped with a bold, creamy Gorgonzola sauce — a powerful combination' },
+  { id: 'mr50', restaurantId: '9', name: 'Bistecca al Pepe Verde',      category: 'Meat', price: 26.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=300&fit=crop', description: 'Rump steak in a velvety green peppercorn cream sauce, served with seasonal vegetables' },
+
+  // Pesce / Fish
+  { id: 'mr51', restaurantId: '9', name: 'Scampi alla Griglia',         category: 'Fish', price: 25.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop', description: '5 king prawns grilled directly on hot lava stone, with lemon, garlic and fresh herbs' },
+  { id: 'mr52', restaurantId: '9', name: 'Scampi del Matera',           category: 'Fish', price: 27.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop', description: '5 king prawns in the house lobster cream sauce — the seafood signature of Ristorante Matera' },
+  { id: 'mr53', restaurantId: '9', name: 'Zanderfilet',                 category: 'Fish', price: 23.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?w=400&h=300&fit=crop', description: 'Pan-seared pike-perch fillet with a Pommery wholegrain mustard sauce and seasonal vegetables' },
+  { id: 'mr54', restaurantId: '9', name: 'Salmone al Vino Bianco',      category: 'Fish', price: 24.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&h=300&fit=crop', description: 'Atlantic salmon fillet poached in white wine with shallots, capers and fresh dill' },
+
+  // Desserts
+  { id: 'mr55', restaurantId: '9', name: 'Tiramisù',                    category: 'Desserts', price: 7.00,  isAvailable: true, image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=300&fit=crop', description: 'Homemade (hausgemacht) — espresso-soaked Savoiardi, mascarpone cream and a generous dusting of dark cocoa' },
+  { id: 'mr56', restaurantId: '9', name: 'Panna Cotta',                 category: 'Desserts', price: 7.00,  isAvailable: true, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop', description: 'Silky vanilla cream set dessert with a coulis of puréed seasonal fruits' },
+  { id: 'mr57', restaurantId: '9', name: 'Tartufo Amaretto',            category: 'Desserts', price: 7.50,  isAvailable: true, image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop', description: 'Classic Italian truffle ice cream with an Amaretto di Saronno heart, dusted in dark cocoa' },
+  { id: 'mr58', restaurantId: '9', name: 'Gelato Misto',                category: 'Desserts', price: 6.00,  isAvailable: true, image: 'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=400&h=300&fit=crop', description: 'Three generous scoops of mixed artisan Italian ice cream — ask your server for today\'s flavours' },
+  { id: 'mr59', restaurantId: '9', name: 'Dessert Misto Matera',        category: 'Desserts', price: 11.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop', description: 'The house dessert plate — a curated selection of Tiramisù, Panna Cotta, Tartufo and seasonal fruit' },
+  { id: 'mr60', restaurantId: '9', name: 'Crème Caramel',               category: 'Desserts', price: 8.00,  isAvailable: true, image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=300&fit=crop', description: 'Classic baked custard with a golden caramel mirror — delicate, silky and not too sweet' },
+
+  // Drinks
+  { id: 'mr61', restaurantId: '9', name: 'Chianti Classico',            category: 'Drinks', price: 6.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop', description: 'Glass of Chianti Classico DOCG — rich Sangiovese with cherry, leather and earthy notes' },
+  { id: 'mr62', restaurantId: '9', name: 'Prosecco DOC',                category: 'Drinks', price: 5.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400&h=300&fit=crop', description: 'Chilled glass of Italian Prosecco Superiore — fine persistent bubbles, notes of apple and white peach' },
+  { id: 'mr63', restaurantId: '9', name: 'Espresso',                    category: 'Drinks', price: 2.50, isAvailable: true, image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&h=300&fit=crop', description: 'Double ristretto from our Italian arabica blend — intense, velvety, the perfect finish to any meal' },
+  { id: 'mr64', restaurantId: '9', name: 'Acqua Minerale',              category: 'Drinks', price: 3.00, isAvailable: true, image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=300&fit=crop', description: 'Still or sparkling Italian mineral water, 500ml bottle' },
 ]
 
 export const tables: Table[] = [
@@ -245,3 +345,8 @@ export const tables: Table[] = [
 ]
 
 export const menuCategories = ['Starters', 'Main Courses', 'Pizza', 'Desserts', 'Drinks']
+
+export const restaurantMenuCategories: Record<string, string[]> = {
+  default: ['Starters', 'Main Courses', 'Pizza', 'Desserts', 'Drinks'],
+  '9': ['Starters', 'Salads', 'Soups', 'Pizza', 'Pasta', 'Handmade Pasta', 'Meat', 'Fish', 'Desserts', 'Drinks'],
+}

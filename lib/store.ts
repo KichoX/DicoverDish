@@ -49,7 +49,7 @@ interface AppState {
 const demoUsers: Record<UserRole, User> = {
   guest: { id: '0', name: 'Guest', email: '', role: 'guest' },
   client: { id: '1', name: 'Laura Martinez', email: 'laura@example.com', role: 'client' },
-  admin: { id: '2', name: 'Marco Rossi', email: 'marco@restaurant.com', role: 'admin' },
+  admin: { id: '2', name: 'Marco Rossi', email: 'marco@restaurant-matera.de', role: 'admin' },
   driver: { id: '3', name: 'Alex Driver', email: 'alex@delivery.com', role: 'driver' },
 }
 
