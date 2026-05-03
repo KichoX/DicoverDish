@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "57/rM9IU7gGOkowBAmjB3EQQEhlZfKmw1Va9xfD1sdc=",
+  "Source": "DiscoverDish.Api",
+  "BasePath": "_content/DiscoverDish.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
