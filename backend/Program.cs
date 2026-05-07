@@ -109,6 +109,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+    await SeedUsersAsync(db);
 }
 
 // ── Middleware Pipeline ───────────────────────────────────────────
@@ -130,5 +131,55 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+static async Task SeedUsersAsync(DiscoverDish.Api.Data.AppDbContext db)
+{
+    var mateId = new Guid("a0000000-0000-0000-0000-000000000009");
+
+    if (!await db.Users.AnyAsync(u => u.Email == "admin@discoverdish.com"))
+    {
+        db.Users.Add(new DiscoverDish.Api.Entities.User
+        {
+            Id = new Guid("e0000000-0000-0000-0000-000000000001"),
+            Name = "Super Admin",
+            Email = "admin@discoverdish.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("SuperAdmin2026!"),
+            Role = DiscoverDish.Api.Entities.UserRole.SuperAdmin,
+            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+        });
+    }
+
+    if (!await db.Users.AnyAsync(u => u.Email == "marco@restaurant-matera.de"))
+    {
+        db.Users.Add(new DiscoverDish.Api.Entities.User
+        {
+            Id = new Guid("e0000000-0000-0000-0000-000000000002"),
+            Name = "Marco Rossi",
+            Email = "marco@restaurant-matera.de",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Matera2026!"),
+            Role = DiscoverDish.Api.Entities.UserRole.Admin,
+            RestaurantId = mateId,
+            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+        });
+    }
+
+    if (!await db.Users.AnyAsync(u => u.Email == "laura@example.com"))
+    {
+        db.Users.Add(new DiscoverDish.Api.Entities.User
+        {
+            Id = new Guid("e0000000-0000-0000-0000-000000000003"),
+            Name = "Laura Martinez",
+            Email = "laura@example.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Client2026!"),
+            Role = DiscoverDish.Api.Entities.UserRole.Client,
+            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+        });
+    }
+
+    await db.SaveChangesAsync();
+}
 
 app.Run();

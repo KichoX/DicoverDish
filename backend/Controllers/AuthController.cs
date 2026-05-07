@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DiscoverDish.Api.DTOs.Auth;
 using DiscoverDish.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +36,24 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<IActionResult> Revoke([FromBody] RefreshTokenRequest request)
     {
         await authService.RevokeAsync(request.RefreshToken);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)!);
+        var user = await authService.GetUserAsync(userId);
+        return Ok(user);
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)!);
+        await authService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
         return NoContent();
     }
 }

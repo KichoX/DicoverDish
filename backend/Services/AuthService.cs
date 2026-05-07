@@ -28,7 +28,6 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
 
         db.Users.Add(user);
         await db.SaveChangesAsync();
-
         return await IssueTokensAsync(user);
     }
 
@@ -70,6 +69,26 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         await db.SaveChangesAsync();
     }
 
+    public async Task ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new KeyNotFoundException("User not found.");
+
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            throw new UnauthorizedAccessException("Current password is incorrect.");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<UserDto> GetUserAsync(Guid userId)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new KeyNotFoundException("User not found.");
+        return MapUser(user);
+    }
+
     private async Task<AuthResponse> IssueTokensAsync(User user)
     {
         var accessToken = CreateAccessToken(user);
@@ -85,14 +104,17 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiry = DateTime.UtcNow.AddMinutes(int.Parse(config["Jwt:AccessTokenExpiryMinutes"]!));
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(ClaimTypes.Name, user.Name),
+            new(ClaimTypes.Role, user.Role.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        if (user.RestaurantId.HasValue)
+            claims.Add(new Claim("restaurantId", user.RestaurantId.Value.ToString()));
 
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],
@@ -113,5 +135,5 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
     };
 
     private static UserDto MapUser(User u) =>
-        new(u.Id, u.Name, u.Email, u.Role.ToString(), u.CreatedAt);
+        new(u.Id, u.Name, u.Email, u.Role.ToString(), u.CreatedAt, u.RestaurantId);
 }

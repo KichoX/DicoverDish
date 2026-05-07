@@ -22,6 +22,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.HasIndex(u => u.Email).IsUnique();
             e.Property(u => u.Role).HasConversion<string>();
+            e.HasOne<Restaurant>()
+             .WithMany()
+             .HasForeignKey(u => u.RestaurantId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<RefreshToken>(e =>

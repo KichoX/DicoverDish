@@ -1,6 +1,6 @@
 namespace DiscoverDish.Api.Entities;
 
-public enum UserRole { Guest, Client, Admin, Driver }
+public enum UserRole { Guest, Client, Admin, Driver, SuperAdmin }
 
 public class User
 {
@@ -9,10 +9,10 @@ public class User
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
     public UserRole Role { get; set; } = UserRole.Client;
+    public Guid? RestaurantId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     public ICollection<Reservation> Reservations { get; set; } = [];
     public ICollection<Order> Orders { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
@@ -26,6 +26,5 @@ public class RefreshToken
     public DateTime ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsRevoked { get; set; }
-
     public User User { get; set; } = null!;
 }

@@ -22,6 +22,26 @@ public class RestaurantsController(IRestaurantService restaurantService) : Contr
         return Ok(await restaurantService.GetAllAsync(cuisine, search, isOpen));
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet("me")]
+    public async Task<ActionResult<RestaurantDto>> GetMine()
+    {
+        var rid = User.FindFirst("restaurantId")?.Value;
+        if (rid == null || !Guid.TryParse(rid, out var restaurantId))
+            return BadRequest("No restaurant linked to this account.");
+        return Ok(await restaurantService.GetByIdAsync(restaurantId));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("me")]
+    public async Task<ActionResult<RestaurantDto>> UpdateMine([FromBody] UpdateRestaurantRequest request)
+    {
+        var rid = User.FindFirst("restaurantId")?.Value;
+        if (rid == null || !Guid.TryParse(rid, out var restaurantId))
+            return BadRequest("No restaurant linked to this account.");
+        return Ok(await restaurantService.UpdateAsync(restaurantId, request));
+    }
+
     [HttpGet("{slug}")]
     public async Task<ActionResult<RestaurantDto>> GetBySlug(string slug)
     {
