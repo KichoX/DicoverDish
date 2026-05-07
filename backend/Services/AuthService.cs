@@ -86,7 +86,7 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
     {
         var user = await db.Users.FindAsync(userId)
             ?? throw new KeyNotFoundException("User not found.");
-        return MapUser(user);
+        return await MapUserAsync(user);
     }
 
     private async Task<AuthResponse> IssueTokensAsync(User user)
@@ -95,7 +95,20 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         var refreshToken = CreateRefreshToken(user.Id);
         db.RefreshTokens.Add(refreshToken);
         await db.SaveChangesAsync();
-        return new AuthResponse(accessToken, refreshToken.Token, MapUser(user));
+        return new AuthResponse(accessToken, refreshToken.Token, await MapUserAsync(user));
+    }
+
+    private async Task<UserDto> MapUserAsync(User u)
+    {
+        string? slug = null;
+        if (u.RestaurantId.HasValue)
+        {
+            slug = await db.Restaurants
+                .Where(r => r.Id == u.RestaurantId.Value)
+                .Select(r => r.Slug)
+                .FirstOrDefaultAsync();
+        }
+        return new UserDto(u.Id, u.Name, u.Email, u.Role.ToString(), u.CreatedAt, u.RestaurantId, slug);
     }
 
     private string CreateAccessToken(User user)
@@ -134,6 +147,4 @@ public class AuthService(AppDbContext db, IConfiguration config) : IAuthService
         ExpiresAt = DateTime.UtcNow.AddDays(30)
     };
 
-    private static UserDto MapUser(User u) =>
-        new(u.Id, u.Name, u.Email, u.Role.ToString(), u.CreatedAt, u.RestaurantId);
 }

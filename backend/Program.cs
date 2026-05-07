@@ -113,6 +113,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ── Middleware Pipeline ───────────────────────────────────────────
+app.UseStaticFiles();
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())

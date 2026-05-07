@@ -121,3 +121,4 @@
 /Users/kristijanlazarov/Desktop/DicoverDish/backend/obj/Debug/net8.0/DiscoverDish.Api.pdb
 /Users/kristijanlazarov/Desktop/DicoverDish/backend/obj/Debug/net8.0/DiscoverDish.Api.genruntimeconfig.cache
 /Users/kristijanlazarov/Desktop/DicoverDish/backend/obj/Debug/net8.0/ref/DiscoverDish.Api.dll
+/Users/kristijanlazarov/Desktop/DicoverDish/backend/bin/Debug/net8.0/DiscoverDish.Api.staticwebassets.runtime.json

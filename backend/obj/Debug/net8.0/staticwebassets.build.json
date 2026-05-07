@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "57/rM9IU7gGOkowBAmjB3EQQEhlZfKmw1Va9xfD1sdc=",
+  "Hash": "kOqCBogzS6UecFKWd5tpCJB2EXvmUFI8ffPpS/dSYKk=",
   "Source": "DiscoverDish.Api",
   "BasePath": "_content/DiscoverDish.Api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "DiscoverDish.Api/wwwroot",
+      "Source": "DiscoverDish.Api",
+      "ContentRoot": "/Users/kristijanlazarov/Desktop/DicoverDish/backend/wwwroot/",
+      "BasePath": "_content/DiscoverDish.Api",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

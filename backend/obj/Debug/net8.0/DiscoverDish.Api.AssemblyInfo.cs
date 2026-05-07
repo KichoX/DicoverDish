@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DiscoverDish.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16c86754bfd8896e91fdd4157b2147da91f6f325")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+056e3c0e020d05002219c7e7461357c6d04ef5bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("DiscoverDish.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DiscoverDish.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
