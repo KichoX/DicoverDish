@@ -51,10 +51,10 @@ const moods = [
 const trending = ['Natural wine bars', 'Omakase', 'Sunday brunch', '72-hour pizza', 'Date night · €€€']
 
 const cities = [
-  { name: 'Hamburg', count: 9,    img: 'https://images.unsplash.com/photo-1552751753-0fc84ae6b9e3?w=800&q=80' },
   { name: 'Berlin',  count: 1214, img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800&q=80' },
   { name: 'Munich',  count: 844,  img: 'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=800&q=80' },
   { name: 'Cologne', count: 438,  img: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80' },
+  { name: 'Frankfurt', count: 312, img: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80' },
 ]
 
 function priceLevel(rating: number) {
@@ -126,7 +126,7 @@ function RestaurantCard({ r, faved = false, onFav }: {
           className="mb-1 uppercase"
           style={{ fontSize: 11, letterSpacing: '0.08em', fontWeight: 500, color: 'var(--muted-2)' }}
         >
-          {r.cuisines.join(' · ')} · Hamburg
+          {r.cuisines.join(' · ')} · Berlin
         </div>
         <h3
           className="mb-1.5 group-hover:underline decoration-[color:var(--brand)] underline-offset-4"
@@ -250,7 +250,7 @@ export default function HomePage() {
                 className="uppercase mb-5"
                 style={{ fontSize: 11, letterSpacing: '0.12em', fontWeight: 500, color: 'var(--muted-ink)' }}
               >
-                Issue №17 · Spring 2026 · Hamburg
+                Issue №17 · Spring 2026 · Berlin
               </p>
 
               <h1
@@ -307,7 +307,7 @@ export default function HomePage() {
                   }}
                 >
                   <Icon name="pin" size={16} />
-                  <span>Hamburg</span>
+                  <span>Berlin</span>
                   <Icon name="chevronD" size={14} />
                 </div>
                 <input
@@ -410,7 +410,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 400, color: 'var(--ink)' }}>{featured.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--muted-ink)' }}>Hamburg · Italian</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted-ink)' }}>Berlin · Italian</div>
                   </div>
                   <Link
                     href={`/r/${featured.id}`}
@@ -442,7 +442,7 @@ export default function HomePage() {
                 }}
               >
                 {[
-                  { n: String(restaurants.length), l: 'places in Hamburg' },
+                  { n: String(restaurants.length), l: 'places in Berlin' },
                   { n: String(openNow.length),     l: 'open tonight' },
                   { n: avgRating + '★',            l: 'avg rating' },
                 ].map((s) => (
@@ -536,7 +536,7 @@ export default function HomePage() {
 
       {/* ════════ COLLECTION: dining tonight ════════ */}
       <Collection
-        title="Dining tonight in Hamburg"
+        title="Dining tonight in Berlin"
         sub={`${openNow.length} tables still open for 8pm`}
         items={openNow.slice(0, 4)}
         favs={favs}
@@ -580,7 +580,7 @@ export default function HomePage() {
                   margin: 0,
                 }}
               >
-                Why the best meal in Hamburg<br />
+                Why the best meal in Berlin<br />
                 is also the{' '}
                 <em style={{ fontStyle: 'italic', color: 'var(--brand)' }}>shortest menu</em>.
               </h2>
@@ -636,7 +636,7 @@ export default function HomePage() {
       {/* ════════ COLLECTION: best rated ════════ */}
       <Collection
         title="Best rated"
-        sub="Hamburg's highest-reviewed tables"
+        sub="Berlin's highest-reviewed tables"
         items={topRated}
         favs={favs}
         onFav={toggleFav}

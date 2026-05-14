@@ -108,7 +108,7 @@ export function SiteHeader({ heroMode: _ }: { heroMode?: boolean } = {}) {
               fontFamily: 'var(--font-sans)',
             }}
           >
-            Hamburg Ed.
+            Berlin Ed.
           </span>
         </Link>
 
@@ -131,7 +131,7 @@ export function SiteHeader({ heroMode: _ }: { heroMode?: boolean } = {}) {
           <Icon name="search" size={16} />
           <span style={{ flex: 1 }}>Restaurants, cuisines, dishes…</span>
           <span style={{ width: 1, height: 18, background: 'var(--hairline)', flexShrink: 0 }} />
-          <span style={{ color: 'var(--ink-2)', fontWeight: 500 }}>Hamburg</span>
+          <span style={{ color: 'var(--ink-2)', fontWeight: 500 }}>Berlin</span>
         </Link>
 
         {/* ── Right nav ── */}
