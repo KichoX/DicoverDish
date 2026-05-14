@@ -14,7 +14,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-import { restaurants, menuItems, restaurantMenuCategories } from '@/lib/data'
+import { restaurants as staticRestaurants, menuItems as staticMenuItems, restaurantMenuCategories } from '@/lib/data'
+import { api } from '@/lib/api'
 import { useAppStore } from '@/lib/store'
 import type { CartItem } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -120,9 +121,9 @@ function MenuItemCard({
   fallbackImage,
   onAdd,
 }: {
-  item: typeof menuItems[0]
+  item: typeof staticMenuItems[0]
   fallbackImage: string
-  onAdd: (item: typeof menuItems[0], qty: number, sourceEl: HTMLElement) => void
+  onAdd: (item: typeof staticMenuItems[0], qty: number, sourceEl: HTMLElement) => void
 }) {
   // Mobile portal state
   const [expanded, setExpanded] = useState(false)
@@ -190,7 +191,7 @@ function MenuItemCard({
           <div className="flip-face rounded-2xl overflow-hidden bg-card flex flex-col">
             <div className="relative flex-1 bg-muted">
               {src ? (
-                <Image src={src} alt={item.name} fill className="object-cover" />
+                <Image src={src} alt={item.name} fill className="object-cover" unoptimized />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
                   <CategoryIconComp className="w-14 h-14 text-white/80" />
@@ -295,7 +296,7 @@ function MenuItemCard({
       >
         <div className="relative w-full bg-muted" style={{ paddingBottom: '65%' }}>
           {src ? (
-            <Image src={src} alt={item.name} fill className="object-cover absolute inset-0" />
+            <Image src={src} alt={item.name} fill className="object-cover absolute inset-0" unoptimized />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
               <CategoryIconComp className="w-14 h-14 text-white/80" />
@@ -345,7 +346,7 @@ function MenuItemCard({
           >
             <div className="relative h-44">
               {src ? (
-                <Image src={src} alt={item.name} fill className="object-cover" />
+                <Image src={src} alt={item.name} fill className="object-cover" unoptimized />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center" style={{ background: gradient }}>
                   <CategoryIconComp className="w-16 h-16 text-white/80" />
@@ -648,7 +649,19 @@ function MenuPageInner({ slug }: { slug: string }) {
     clearCart, addOrder, setCurrentRestaurantId, setOrderMode, setTableNumber, user,
   } = useAppStore()
 
-  const restaurant = restaurants.find((r) => generateSlug(r.name) === slug)
+  const [restaurants, setRestaurants] = useState(staticRestaurants)
+  const [menuItems, setMenuItems] = useState(staticMenuItems)
+  const restaurant = restaurants.find((r) => generateSlug(r.name) === slug) ?? restaurants[0]
+
+  useEffect(() => {
+    api.getRestaurantBySlug(slug)
+      .then(r => {
+        setRestaurants([r])
+        return api.getMenu(r.id)
+      })
+      .then(items => setMenuItems(items))
+      .catch(() => {})
+  }, [slug])
 
   const [step,         setStep]         = useState<Step>('menu')
   const [cartOpen,     setCartOpen]     = useState(false)
@@ -666,6 +679,10 @@ function MenuPageInner({ slug }: { slug: string }) {
   const fabRef      = useRef<HTMLButtonElement>(null)
   const [flyItems,  setFlyItems]  = useState<FlyItem[]>([])
   const [fabBounce, setFabBounce] = useState(false)
+
+  useEffect(() => {
+    if (!restaurantCategories.includes(selectedCategory)) setSelectedCategory(restaurantCategories[0])
+  }, [restaurantCategories, selectedCategory])
 
   useEffect(() => {
     if (restaurant) {
@@ -689,7 +706,12 @@ function MenuPageInner({ slug }: { slug: string }) {
   const restaurantMenuItems = menuItems.filter((item) =>
     item.restaurantId ? item.restaurantId === restaurant.id : restaurant.id !== '9'
   )
-  const categories = restaurantMenuCategories[restaurant.id] ?? restaurantMenuCategories.default
+  const categories = (() => {
+    const known = restaurantMenuCategories[restaurant.id]
+    if (known) return known
+    const fromItems = [...new Set(restaurantMenuItems.map(m => m.category))]
+    return fromItems.length > 0 ? fromItems : restaurantMenuCategories.default
+  })()
   const categoryItems = restaurantMenuItems.filter((item) => item.category === selectedCategory)
   const cartItemCount  = cart.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal       = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -730,9 +752,21 @@ function MenuPageInner({ slug }: { slug: string }) {
   const handleNoteChange = (id: string, note: string) =>
     setItemNotes((prev) => ({ ...prev, [id]: note }))
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isDineIn && (!name.trim() || !phone.trim())) return
     if (!isDineIn && deliveryMethod === 'delivery' && !address.trim()) return
+
+    // Persist order to DB
+    await api.createOrder({
+      restaurantId: restaurant.id,
+      type: isDineIn ? 'DineIn' : deliveryMethod === 'delivery' ? 'Delivery' : 'Pickup',
+      tableNumber: isDineIn && tableParam ? tableParam : undefined,
+      deliveryAddress: !isDineIn && deliveryMethod === 'delivery' ? address : undefined,
+      guestName: name,
+      guestPhone: phone,
+      orderNotes: orderNotes || undefined,
+      items: cart.map(i => ({ menuItemId: i.id, quantity: i.quantity, notes: i.notes })),
+    }).catch(() => {})
 
     addOrder({
       id: `order-${Date.now()}`,

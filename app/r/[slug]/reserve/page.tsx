@@ -1,527 +1,444 @@
 'use client'
 
-import { use, useState, useEffect } from 'react'
+import { use, useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, Calendar, Users, Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Card, CardContent } from '@/components/ui/card'
-import { restaurants, tables } from '@/lib/data'
+import { ArrowLeft, ChevronLeft, ChevronRight, Users } from 'lucide-react'
+import { restaurants as staticRestaurants } from '@/lib/data'
 import { useAppStore } from '@/lib/store'
-import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
 
 function generateSlug(name: string): string {
   return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 }
 
-type Step = 'table' | 'details' | 'success'
-
-// Table visual dimensions by capacity
-function getTableDims(capacity: number, shape: string) {
-  if (shape === 'round') {
-    const d = capacity <= 2 ? 52 : capacity <= 4 ? 68 : 80
-    return { tw: d, th: d }
+function getDateOptions() {
+  const dates: { label: string; short: string; iso: string }[] = []
+  const now = new Date()
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(now)
+    d.setDate(now.getDate() + i)
+    dates.push({
+      label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+      short: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }),
+      iso: d.toISOString().split('T')[0],
+    })
   }
-  if (capacity <= 2) return { tw: 64, th: 44 }
-  if (capacity <= 4) return { tw: 90, th: 62 }
-  if (capacity <= 6) return { tw: 114, th: 70 }
-  return { tw: 140, th: 78 }
+  return dates
 }
 
-// Predefined % positions (cx, cy = center) per section table
-const POSITIONS: Record<string, { x: number; y: number }> = {
-  // Garden: t1(round2), t2(rect4), t3(rect6 - unavailable)
-  t1:  { x: 16, y: 22 },
-  t2:  { x: 65, y: 18 },
-  t3:  { x: 38, y: 64 },
-  // Fountain: t4(round2), t5(rect4), t6(square4), t7(round2), t8(rect6), t9(round2-unavail)
-  t4:  { x: 14, y: 14 },
-  t5:  { x: 66, y: 12 },
-  t6:  { x: 14, y: 48 },
-  t7:  { x: 68, y: 50 },
-  t8:  { x: 14, y: 79 },
-  t9:  { x: 68, y: 80 },
-  // 1st Floor: t10(rect8), t11(round4), t12(rect6)
-  t10: { x: 18, y: 18 },
-  t11: { x: 70, y: 15 },
-  t12: { x: 18, y: 65 },
+function getTimeSlots() {
+  const slots: string[] = []
+  for (let h = 12; h <= 22; h++) {
+    slots.push(`${h}:00`)
+    if (h < 22) slots.push(`${h}:30`)
+  }
+  return slots
 }
 
-function FloorTable({
-  table,
-  isSelected,
-  guestCount,
-  onSelect,
-}: {
-  table: typeof tables[0]
-  isSelected: boolean
-  guestCount: number
-  onSelect: (id: string) => void
-}) {
-  const { tw, th } = getTableDims(table.capacity, table.shape)
-  const pos = POSITIONS[table.id]
-  const CHAIR = 9
-  const GAP = 5
-  const pad = CHAIR + GAP
+const OCCASIONS = ['Date night', 'Birthday', 'Anniversary', 'Business', 'Just hungry']
 
-  const isRound = table.shape === 'round'
-  const canSelect = table.isAvailable && table.capacity >= guestCount
-
-  // Build chair positions (relative to table top-left)
-  const chairs: Array<{ x: number; y: number; w: number; h: number }> = []
-  if (isRound) {
-    const count = Math.min(table.capacity, 8)
-    const r = tw / 2 + GAP + CHAIR / 2
-    for (let i = 0; i < count; i++) {
-      const a = (i / count) * 2 * Math.PI - Math.PI / 2
-      chairs.push({ x: tw / 2 + r * Math.cos(a) - CHAIR / 2, y: th / 2 + r * Math.sin(a) - CHAIR / 2, w: CHAIR, h: CHAIR })
-    }
-  } else {
-    const hc = table.capacity <= 2 ? 1 : table.capacity <= 4 ? 2 : 3
-    const spacing = tw / (hc + 1)
-    for (let i = 0; i < hc; i++) {
-      chairs.push({ x: spacing * (i + 1) - CHAIR / 2, y: -(GAP + CHAIR), w: CHAIR, h: CHAIR })
-      chairs.push({ x: spacing * (i + 1) - CHAIR / 2, y: th + GAP, w: CHAIR, h: CHAIR })
-    }
-    // left / right side chairs
-    chairs.push({ x: -(GAP + CHAIR), y: th / 2 - CHAIR / 2, w: CHAIR, h: CHAIR })
-    chairs.push({ x: tw + GAP, y: th / 2 - CHAIR / 2, w: CHAIR, h: CHAIR })
-  }
-
-  const chairColor = isSelected
-    ? 'bg-blue-400'
-    : canSelect
-    ? 'bg-blue-200'
-    : 'bg-gray-200'
-
-  const tableClass = cn(
-    'absolute border-2 flex items-center justify-center transition-all',
-    isRound ? 'rounded-full' : 'rounded-xl',
-    isSelected
-      ? 'bg-blue-100 border-blue-500 shadow-md shadow-blue-200'
-      : canSelect
-      ? 'bg-blue-50 border-blue-300 hover:border-blue-400 hover:bg-blue-100/60 cursor-pointer'
-      : 'bg-gray-50 border-gray-200 cursor-not-allowed'
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted-2)', marginBottom: 10, marginTop: 0 }}>
+      {children}
+    </p>
   )
+}
 
-  if (!pos) return null
+function Field({ label, placeholder, value, onChange, type = 'text' }: {
+  label: string; placeholder: string; value: string
+  onChange: (v: string) => void; type?: string
+}) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          width: '100%', boxSizing: 'border-box',
+          padding: '14px 16px', borderRadius: 8,
+          border: '1px solid var(--hairline)',
+          background: 'var(--paper)',
+          fontSize: 15, color: 'var(--ink)',
+          outline: 'none',
+          fontFamily: 'var(--font-sans)',
+        }}
+      />
+    </div>
+  )
+}
+
+/* ── Animated success checkmark ── */
+function SuccessCheck() {
+  return (
+    <>
+      <style>{`
+        @keyframes circle-pop {
+          0%   { transform: scale(0); opacity: 0; }
+          60%  { transform: scale(1.12); opacity: 1; }
+          80%  { transform: scale(0.94); }
+          100% { transform: scale(1); }
+        }
+        @keyframes check-draw {
+          0%   { stroke-dashoffset: 60; opacity: 0; }
+          30%  { opacity: 1; }
+          100% { stroke-dashoffset: 0; }
+        }
+        .success-circle {
+          animation: circle-pop 0.55s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .success-check {
+          stroke-dasharray: 60;
+          stroke-dashoffset: 60;
+          animation: check-draw 0.45s 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+      `}</style>
+      <div style={{ margin: '0 auto 28px', width: 80, height: 80 }}>
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: 80, height: 80 }}>
+          <circle className="success-circle" cx="40" cy="40" r="40" fill="#2e7d48" />
+          <polyline
+            className="success-check"
+            points="22,41 35,54 58,28"
+            stroke="white"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+      </div>
+    </>
+  )
+}
+
+function ReservePageInner({ slug }: { slug: string }) {
+  const searchParams = useSearchParams()
+  const { addReservation, user } = useAppStore()
+
+  const dateOptions = getDateOptions()
+  const timeSlots = getTimeSlots()
+
+  const paramGuests = searchParams.get('guests')
+  const paramDate   = searchParams.get('date')
+  const paramTime   = searchParams.get('time')
+
+  const initDateIdx = paramDate
+    ? Math.max(0, dateOptions.findIndex(d => d.iso === paramDate))
+    : 0
+
+  const [step, setStep]         = useState<'select' | 'details' | 'success'>('select')
+  const [guests, setGuests]     = useState(paramGuests ? parseInt(paramGuests) : 2)
+  const [selectedDateIdx, setSelectedDateIdx] = useState(initDateIdx)
+  const [selectedTime, setSelectedTime]       = useState<string | null>(paramTime ?? null)
+  const [dateOffset, setDateOffset]           = useState(Math.floor(initDateIdx / 5) * 5)
+
+  const [name,     setName]     = useState(user?.name  || '')
+  const [phone,    setPhone]    = useState('')
+  const [email,    setEmail]    = useState(user?.email || '')
+  const [occasion, setOccasion] = useState<string | null>(null)
+  const [requests, setRequests] = useState('')
+  const [restaurants, setRestaurants] = useState(staticRestaurants)
+
+  useEffect(() => {
+    api.getRestaurantBySlug(slug).then(r => setRestaurants([r])).catch(() => {})
+  }, [slug])
+
+  const restaurant = restaurants.find(r => generateSlug(r.name) === slug) ?? restaurants[0]
+  const canSecure  = selectedTime !== null
+
+  if (!restaurant) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--canvas)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 24, color: 'var(--ink)' }}>Restaurant not found</h1>
+          <Link href="/search" style={{ color: 'var(--brand)', fontSize: 14 }}>Browse restaurants</Link>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedDateLabel = dateOptions[selectedDateIdx]?.label ?? ''
+  const visibleDates = dateOptions.slice(dateOffset, dateOffset + 5)
+
+  const handleConfirm = async () => {
+    if (!name || !phone) return
+    const dateIso = dateOptions[selectedDateIdx].iso
+    // Save to DB
+    await api.createReservation({
+      restaurantId: restaurant.id,
+      guestName: name,
+      guestPhone: phone,
+      guestEmail: email || undefined,
+      date: dateIso,
+      time: selectedTime!,
+      guests,
+      occasion: occasion ?? undefined,
+      specialRequests: requests || undefined,
+    }).catch(() => {})
+    // Mirror in local store for instant UI
+    addReservation({
+      id: `res-${Date.now()}`,
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+      date: new Date(dateIso),
+      time: selectedTime!,
+      guests,
+      name,
+      phone,
+      status: 'confirmed' as const,
+    })
+    setStep('success')
+  }
+
+  const HR = () => <div style={{ height: 1, background: 'var(--hairline)', margin: '28px 0' }} />
 
   return (
-    <div
-      className={cn('absolute', !canSelect && 'opacity-50')}
-      style={{
-        left: `${pos.x}%`,
-        top: `${pos.y}%`,
-        transform: 'translate(-50%, -50%)',
-        width: tw + pad * 2,
-        height: th + pad * 2,
-      }}
-      onClick={() => canSelect && onSelect(table.id)}
-    >
-      {/* Chair indicators */}
-      {chairs.map((c, i) => (
-        <div
-          key={i}
-          className={cn('absolute rounded-sm transition-colors', chairColor)}
-          style={{ left: c.x + pad, top: c.y + pad, width: c.w, height: c.h }}
-        />
-      ))}
+    <div style={{ background: 'var(--canvas)', minHeight: '100vh' }}>
 
-      {/* Table surface */}
-      <div className={tableClass} style={{ left: pad, top: pad, width: tw, height: th }}>
-        <span className={cn(
-          'text-sm font-semibold select-none',
-          isSelected ? 'text-blue-600' : canSelect ? 'text-blue-400' : 'text-gray-300'
-        )}>
-          {table.number}
-        </span>
-      </div>
+      {/* ── Minimal header — no full navbar ── */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        background: 'var(--paper)',
+        borderBottom: '1px solid var(--hairline)',
+        padding: '0 24px',
+        height: 56,
+        display: 'flex', alignItems: 'center', gap: 14,
+      }}>
+        <Link
+          href={`/r/${slug}`}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 34, height: 34, borderRadius: '50%',
+            border: '1px solid var(--hairline)',
+            color: 'var(--ink)', textDecoration: 'none',
+            background: 'var(--canvas)', flexShrink: 0,
+          }}
+        >
+          <ArrowLeft size={16} />
+        </Link>
+        <div>
+          <p style={{ fontSize: 11, color: 'var(--muted-ink)', margin: 0, lineHeight: 1.2 }}>Reserving at</p>
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', margin: 0, lineHeight: 1.2 }}>{restaurant.name}</p>
+        </div>
+      </header>
+
+      <main style={{ maxWidth: 740, margin: '0 auto', padding: '40px 24px 80px' }}>
+
+        {/* ══ SUCCESS ══ */}
+        {step === 'success' && (
+          <div style={{ textAlign: 'center', paddingTop: 48 }}>
+            <SuccessCheck />
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 38, fontWeight: 400, color: 'var(--ink)', margin: '0 0 12px' }}>
+              Reservation confirmed!
+            </h2>
+            <p style={{ fontSize: 15, color: 'var(--muted-ink)', marginBottom: 36 }}>
+              We&apos;ve noted your reservation and will send a confirmation shortly.
+            </p>
+
+            {/* Summary table */}
+            <div style={{ border: '1px solid var(--hairline)', borderRadius: 14, overflow: 'hidden', marginBottom: 40, textAlign: 'left', background: 'var(--paper)' }}>
+              {[
+                { label: 'Restaurant', value: restaurant.name },
+                { label: 'Date',       value: selectedDateLabel },
+                { label: 'Time',       value: selectedTime! },
+                { label: 'Guests',     value: `${guests} guest${guests > 1 ? 's' : ''}` },
+                { label: 'Name',       value: name },
+              ].map((row, i, arr) => (
+                <div
+                  key={row.label}
+                  style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '16px 24px',
+                    borderBottom: i < arr.length - 1 ? '1px solid var(--hairline)' : 'none',
+                    fontSize: 15,
+                  }}
+                >
+                  <span style={{ color: 'var(--muted-ink)' }}>{row.label}</span>
+                  <span style={{ fontWeight: 500, color: 'var(--ink)' }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Single CTA text */}
+            <p style={{ fontSize: 15, color: 'var(--muted-ink)' }}>
+              Plan your next dish at{' '}
+              <Link
+                href="/"
+                style={{ color: 'var(--brand)', fontWeight: 600, textDecoration: 'none' }}
+              >
+                DiscoverDish
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {step !== 'success' && (
+          <>
+            {/* ══ STEP 1 ══ */}
+            <div style={{
+              border: '1px solid var(--hairline)', borderRadius: 16,
+              padding: '28px 28px 24px', background: 'var(--paper)', marginBottom: 28,
+              opacity: step === 'details' ? 0.6 : 1,
+              pointerEvents: step === 'details' ? 'none' : 'auto',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: step === 'details' ? 'var(--muted-2)' : 'var(--brand)' }}>
+                  Step 1 · Date &amp; time
+                </span>
+                {step === 'details' && (
+                  <button onClick={() => setStep('select')} style={{ fontSize: 13, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, padding: 0 }}>
+                    Edit
+                  </button>
+                )}
+              </div>
+
+              {/* Summary when collapsed */}
+              {step === 'details' ? (
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                  {[
+                    { icon: <Users size={15} />, text: `${guests} guest${guests > 1 ? 's' : ''}` },
+                    { text: selectedDateLabel },
+                    { text: selectedTime! },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--ink)', fontWeight: 500 }}>
+                      {item.icon}
+                      <span>{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Guests */}
+                  <div style={{ marginBottom: 28 }}>
+                    <Label>How many guests?</Label>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <button key={n} onClick={() => setGuests(n)} style={{ width: 52, height: 52, borderRadius: 12, border: '1px solid', borderColor: guests === n ? 'var(--brand)' : 'var(--hairline)', background: guests === n ? 'color-mix(in srgb, var(--brand) 8%, transparent)' : 'var(--canvas)', color: guests === n ? 'var(--brand)' : 'var(--ink)', fontSize: 16, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}>
+                          {n === 6 ? '6+' : n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <div style={{ marginBottom: 28 }}>
+                    <Label>When?</Label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button onClick={() => setDateOffset(Math.max(0, dateOffset - 1))} disabled={dateOffset === 0} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--canvas)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: dateOffset === 0 ? 'not-allowed' : 'pointer', opacity: dateOffset === 0 ? 0.3 : 1, flexShrink: 0 }}>
+                        <ChevronLeft size={16} />
+                      </button>
+                      <div style={{ display: 'flex', gap: 8, flex: 1 }}>
+                        {visibleDates.map((d, i) => {
+                          const gIdx = dateOffset + i
+                          const isSel = selectedDateIdx === gIdx
+                          return (
+                            <button key={d.iso} onClick={() => setSelectedDateIdx(gIdx)} style={{ flex: 1, padding: '10px 4px', borderRadius: 10, border: '1px solid', borderColor: isSel ? 'var(--brand)' : 'var(--hairline)', background: isSel ? 'color-mix(in srgb, var(--brand) 8%, transparent)' : 'var(--canvas)', color: isSel ? 'var(--brand)' : 'var(--ink)', fontSize: 12, fontWeight: isSel ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                              {d.short}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <button onClick={() => setDateOffset(Math.min(dateOptions.length - 5, dateOffset + 1))} disabled={dateOffset >= dateOptions.length - 5} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--hairline)', background: 'var(--canvas)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: dateOffset >= dateOptions.length - 5 ? 'not-allowed' : 'pointer', opacity: dateOffset >= dateOptions.length - 5 ? 0.3 : 1, flexShrink: 0 }}>
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Time slots */}
+                  <div style={{ marginBottom: 28 }}>
+                    <Label>What time?</Label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8 }}>
+                      {timeSlots.map((t) => (
+                        <button key={t} onClick={() => setSelectedTime(t)} style={{ padding: '10px 4px', borderRadius: 8, border: '1px solid', borderColor: selectedTime === t ? 'var(--brand)' : 'var(--hairline)', background: selectedTime === t ? 'color-mix(in srgb, var(--brand) 8%, transparent)' : 'var(--canvas)', color: selectedTime === t ? 'var(--brand)' : 'var(--ink)', fontSize: 13, fontWeight: selectedTime === t ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center' }}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setStep('details')}
+                    disabled={!canSecure}
+                    style={{ width: '100%', padding: '15px', borderRadius: 999, background: canSecure ? 'var(--brand)' : 'var(--hairline)', color: canSecure ? '#fff' : 'var(--muted-ink)', fontSize: 15, fontWeight: 600, border: 'none', cursor: canSecure ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}
+                  >
+                    {canSecure ? `Secure date · ${selectedTime}` : 'Select a time to continue'}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* ══ STEP 2 ══ */}
+            {step === 'details' && (
+              <div style={{ border: '1px solid var(--hairline)', borderRadius: 16, padding: '28px 28px 24px', background: 'var(--paper)' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--brand)', display: 'block', marginBottom: 24 }}>
+                  Step 2 · Guest details
+                </span>
+
+                <div style={{ marginBottom: 28 }}>
+                  <Label>Guest details</Label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <Field label="Full name" placeholder="Elena Weber" value={name} onChange={setName} />
+                    <Field label="Phone" placeholder="+49 170 1234567" value={phone} onChange={setPhone} type="tel" />
+                  </div>
+                  <Field label="Email" placeholder="elena@example.com" value={email} onChange={setEmail} type="email" />
+                </div>
+
+                <HR />
+
+                <div style={{ marginBottom: 28 }}>
+                  <Label>Occasion (optional)</Label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                    {OCCASIONS.map((o) => (
+                      <button key={o} onClick={() => setOccasion(occasion === o ? null : o)} style={{ padding: '9px 18px', borderRadius: 999, border: '1px solid', borderColor: occasion === o ? 'var(--brand)' : 'var(--hairline)', background: occasion === o ? 'color-mix(in srgb, var(--brand) 8%, transparent)' : 'var(--paper)', color: occasion === o ? 'var(--brand)' : 'var(--ink)', fontSize: 14, cursor: 'pointer', transition: 'all 0.15s' }}>
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <HR />
+
+                <div style={{ marginBottom: 32 }}>
+                  <Label>Special requests</Label>
+                  <textarea
+                    placeholder="Allergies, seating preferences, surprises..."
+                    value={requests}
+                    onChange={e => setRequests(e.target.value)}
+                    rows={4}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '14px 16px', borderRadius: 8, border: '1px solid var(--hairline)', background: 'var(--paper)', fontSize: 15, color: 'var(--ink)', outline: 'none', resize: 'vertical', fontFamily: 'var(--font-sans)' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button onClick={() => setStep('select')} style={{ padding: '13px 24px', borderRadius: 999, border: '1px solid var(--hairline)', background: 'var(--paper)', fontSize: 14, fontWeight: 500, color: 'var(--ink)', cursor: 'pointer' }}>
+                    Back
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={!name || !phone}
+                    style={{ padding: '13px 32px', borderRadius: 999, background: name && phone ? 'var(--brand)' : 'var(--hairline)', color: name && phone ? '#fff' : 'var(--muted-ink)', fontSize: 15, fontWeight: 600, border: 'none', cursor: name && phone ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}
+                  >
+                    Confirm reservation
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </main>
     </div>
   )
 }
 
 export default function ReservePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
-  const searchParams = useSearchParams()
-  const { addReservation, user } = useAppStore()
-
-  const restaurant = restaurants.find((r) => generateSlug(r.name) === slug)
-
-  const dateParam = searchParams.get('date')
-  const timeParam = searchParams.get('time')
-  const guestsParam = searchParams.get('guests')
-
-  const [step, setStep] = useState<Step>('table')
-  const [selectedDate] = useState<Date>(dateParam ? new Date(dateParam) : new Date())
-  const [selectedTime] = useState<string>(timeParam || '7:00 PM')
-  const [guestCount] = useState(guestsParam ? parseInt(guestsParam) : 2)
-  const [selectedSection, setSelectedSection] = useState('Fountain')
-  const [selectedTable, setSelectedTable] = useState<string | null>(null)
-
-  const [name, setName] = useState(user?.name || '')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState(user?.email || '')
-  const [specialRequests, setSpecialRequests] = useState('')
-
-  useEffect(() => {
-    if (user) { setName(user.name); setEmail(user.email) }
-  }, [user])
-
-  if (!restaurant) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Restaurant not found</h1>
-          <Button asChild><Link href="/">Browse Restaurants</Link></Button>
-        </div>
-      </div>
-    )
-  }
-
-  const tableSections = [...new Set(tables.map((t) => t.section))]
-  const sectionTables = tables.filter((t) => t.section === selectedSection)
-
-  const handleConfirm = () => {
-    if (!name || !phone) return
-    addReservation({
-      id: `res-${Date.now()}`,
-      restaurantId: restaurant.id,
-      restaurantName: restaurant.name,
-      date: selectedDate,
-      time: selectedTime,
-      guests: guestCount,
-      name,
-      phone,
-      tableId: selectedTable || undefined,
-      status: 'confirmed' as const,
-    })
-    setStep('success')
-  }
-
-  const formattedDate = selectedDate.toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-  })
-
-  const sectionEmoji: Record<string, string> = {
-    Garden: '🌿', Fountain: '⛲', '1st Floor': '🏠',
-  }
-
-  const selectedTableData = tables.find((t) => t.id === selectedTable)
-
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-40 bg-card border-b border-border flex-shrink-0">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/r/${slug}`}
-              className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <span className="font-medium text-sm">{restaurant.name}</span>
-          </div>
-          {step !== 'success' && (
-            <span className="text-xs text-muted-foreground">
-              Step {step === 'table' ? '1' : '2'} of 2
-            </span>
-          )}
-        </div>
-      </header>
-
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-32">
-
-        {/* ── Step pills ── */}
-        {step !== 'success' && (
-          <div className="flex items-center gap-3 mb-6">
-            <div className={cn(
-              'h-8 px-4 rounded-full text-xs font-semibold inline-flex items-center transition-colors',
-              step === 'table' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            )}>
-              1. Choose table
-            </div>
-            <div className="flex-1 h-px bg-border max-w-[2rem]" />
-            <div className={cn(
-              'h-8 px-4 rounded-full text-xs font-semibold inline-flex items-center border transition-colors',
-              step === 'details'
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border text-muted-foreground bg-transparent'
-            )}>
-              2. Your details
-            </div>
-          </div>
-        )}
-
-        {/* ── Reservation summary card ── */}
-        {step !== 'success' && (
-          <div className="flex items-center justify-between bg-card border border-border rounded-2xl px-5 py-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{formattedDate}</p>
-                <p className="text-sm text-muted-foreground">{selectedTime}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="w-4 h-4" />
-              <span className="font-medium text-foreground">{guestCount} guests</span>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 1: Choose table ── */}
-        {step === 'table' && (
-          <div className="space-y-5">
-            <h1 className="font-serif text-3xl italic">Choose table</h1>
-
-            {/* Section tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              {tableSections.map((section) => (
-                <button
-                  key={section}
-                  onClick={() => { setSelectedSection(section); setSelectedTable(null) }}
-                  className={cn(
-                    'h-9 px-4 rounded-full text-sm font-medium border whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0',
-                    selectedSection === section
-                      ? 'bg-primary/10 text-primary border-primary/30'
-                      : 'border-border hover:border-primary/30 hover:bg-muted/40 text-foreground'
-                  )}
-                >
-                  <span>{sectionEmoji[section] ?? '🍽️'}</span>
-                  <span>{section}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Floor plan */}
-            <div
-              className="relative bg-slate-50 rounded-2xl border border-border overflow-hidden"
-              style={{ height: 420 }}
-            >
-              {sectionTables.map((table) => (
-                <FloorTable
-                  key={table.id}
-                  table={table}
-                  isSelected={selectedTable === table.id}
-                  guestCount={guestCount}
-                  onSelect={setSelectedTable}
-                />
-              ))}
-
-              {/* Legend */}
-              <div className="absolute bottom-3 right-3 flex items-center gap-3 text-[10px] text-muted-foreground bg-card/80 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-border/40">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-sm bg-blue-100 border border-blue-300 inline-block" />
-                  Available
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-sm bg-gray-100 border border-gray-200 inline-block" />
-                  Taken
-                </span>
-              </div>
-            </div>
-
-            {/* Selected table chip */}
-            {selectedTable && (
-              <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-3">
-                <div>
-                  <p className="font-semibold text-sm">Table {selectedTableData?.number}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Up to {selectedTableData?.capacity} guests · {selectedSection}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedTable(null)}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Change
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── STEP 2: Your details ── */}
-        {step === 'details' && (
-          <div className="space-y-5">
-            <h1 className="font-serif text-3xl italic">Your details</h1>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Your Name *</label>
-                <Input
-                  placeholder="Full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-11 rounded-xl"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Phone *</label>
-                  <Input
-                    type="tel"
-                    placeholder="+1 555 000 0000"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Email</label>
-                  <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Special requests</label>
-                <Input
-                  placeholder="Allergies, special occasions..."
-                  value={specialRequests}
-                  onChange={(e) => setSpecialRequests(e.target.value)}
-                  className="h-11 rounded-xl"
-                />
-              </div>
-            </div>
-
-            {/* Booking summary */}
-            <div className="rounded-2xl border border-border bg-card p-4 space-y-2.5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Booking summary</p>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Restaurant</span>
-                <span className="font-medium">{restaurant.name}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Date &amp; time</span>
-                <span className="font-medium">{formattedDate} · {selectedTime}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Party size</span>
-                <span className="font-medium">{guestCount} guests</span>
-              </div>
-              {selectedTableData && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Table</span>
-                  <span className="font-medium">#{selectedTableData.number} · {selectedSection}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Desktop CTA */}
-            <div className="hidden md:flex gap-3 pt-1">
-              <Button
-                variant="outline"
-                className="h-11 px-5 rounded-xl"
-                onClick={() => setStep('table')}
-              >
-                Back
-              </Button>
-              <Button
-                className="flex-1 h-11 rounded-xl"
-                disabled={!name || !phone}
-                onClick={handleConfirm}
-              >
-                Confirm reservation
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Success ── */}
-        {step === 'success' && (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
-              <Check className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="font-serif text-3xl italic mb-2">Reservation Confirmed!</h2>
-            <p className="text-muted-foreground mb-8">
-              We&apos;ve noted your reservation and will send a confirmation shortly.
-            </p>
-
-            <Card className="text-left mb-6">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Restaurant</span>
-                  <span className="font-medium">{restaurant.name}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Date &amp; time</span>
-                  <span className="font-medium">{formattedDate} · {selectedTime}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Party size</span>
-                  <span className="font-medium">{guestCount} guests</span>
-                </div>
-                {selectedTableData && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Table</span>
-                    <span className="font-medium">#{selectedTableData.number} · {selectedSection}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 rounded-full h-11" asChild>
-                <Link href={`/r/${slug}`}>Back to Restaurant</Link>
-              </Button>
-              <Button className="flex-1 rounded-full h-11" asChild>
-                <Link href="/">Discover More</Link>
-              </Button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* ── Mobile bottom button ── */}
-      {step !== 'success' && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30">
-          <div className="p-4 bg-gradient-to-t from-background via-background to-transparent pt-8">
-            <Button
-              className="w-full h-13 rounded-2xl text-base font-semibold shadow-xl"
-              disabled={step === 'details' && (!name || !phone)}
-              onClick={() => {
-                if (step === 'table') setStep('details')
-                else handleConfirm()
-              }}
-            >
-              {step === 'table'
-                ? selectedTable
-                  ? `Continue · Table ${selectedTableData?.number}`
-                  : 'Continue without table preference'
-                : 'Confirm Reservation'}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Desktop bottom button for step 1 ── */}
-      {step === 'table' && (
-        <div className="hidden md:block">
-          <div className="max-w-2xl mx-auto px-4 pb-10">
-            <div className="flex justify-end">
-              <Button
-                className="h-11 px-7 rounded-xl text-sm font-semibold"
-                onClick={() => setStep('details')}
-              >
-                {selectedTable ? `Continue · Table ${selectedTableData?.number}` : 'Continue without preference'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <Suspense>
+      <ReservePageInner slug={slug} />
+    </Suspense>
   )
 }

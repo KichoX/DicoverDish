@@ -3,28 +3,24 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  ChefHat, ClipboardList, CalendarDays, UtensilsCrossed,
-  LayoutDashboard, Settings, LogOut, ChevronLeft, ChevronRight, ExternalLink,
+  LayoutDashboard, Store, Users, LogOut,
+  ChevronLeft, ChevronRight, UtensilsCrossed, ShieldCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { useAppStore } from '@/lib/store'
 
 const navItems = [
-  { href: '/admin',              icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/admin/kitchen',      icon: ChefHat,          label: 'Kitchen' },
-  { href: '/admin/orders',       icon: ClipboardList,    label: 'Orders' },
-  { href: '/admin/reservations', icon: CalendarDays,     label: 'Reservations' },
-  { href: '/admin/menu',         icon: UtensilsCrossed,  label: 'Menu' },
-  { href: '/admin/settings',     icon: Settings,         label: 'Settings' },
+  { href: '/super-admin',         icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/super-admin/restaurants', icon: Store,       label: 'Restaurants' },
+  { href: '/super-admin/users',   icon: Users,           label: 'Users' },
 ]
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
-  const { logout, user } = useAppStore()
-  const restaurantSlug = user?.restaurantSlug
+  const { logout } = useAppStore()
 
   const handleLogout = () => {
     logout()
@@ -33,14 +29,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar — fixed height, never scrolls */}
       <aside
         className={cn(
           'hidden md:flex flex-col bg-card border-r border-border transition-all duration-300 ease-in-out flex-shrink-0 h-screen sticky top-0',
           collapsed ? 'w-16' : 'w-64'
         )}
       >
-        {/* Logo */}
         <div className={cn('flex-shrink-0 border-b border-border overflow-hidden whitespace-nowrap', collapsed ? 'p-3' : 'p-5')}>
           <Link href="/" className="block hover:opacity-80 transition-opacity">
             {collapsed ? (
@@ -49,14 +43,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             ) : (
               <>
-                <h1 className="text-lg font-bold leading-tight">DiscoverDish</h1>
-                <p className="text-xs text-muted-foreground mt-0.5">Admin Dashboard</p>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-primary" />
+                  <h1 className="text-lg font-bold leading-tight">DiscoverDish</h1>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">Super Admin</p>
               </>
             )}
           </Link>
         </div>
 
-        {/* Nav — takes remaining space, no overflow */}
         <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-hidden">
           {navItems.map((item) => {
             const isActive = pathname === item.href
@@ -80,21 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        {/* Bottom: always visible — view restaurant + collapse + logout */}
         <div className="flex-shrink-0 px-2 pb-3 pt-3 space-y-0.5 border-t border-border">
-          {restaurantSlug && (
-            <Link
-              href={`/r/${restaurantSlug}`}
-              title={collapsed ? 'View Restaurant' : undefined}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-xl w-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors',
-                collapsed ? 'justify-center' : ''
-              )}
-            >
-              <ExternalLink className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span className="text-sm font-medium">View Restaurant</span>}
-            </Link>
-          )}
           <button
             onClick={() => setCollapsed(!collapsed)}
             title={collapsed ? 'Expand' : 'Collapse'}
@@ -121,12 +103,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
         <header className="md:hidden sticky top-0 z-40 bg-card border-b border-border">
           <div className="flex items-center justify-between px-4 py-3">
-            <Link href="/" className="font-semibold text-sm">DiscoverDish Admin</Link>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-sm">Super Admin</span>
+            </div>
             <button onClick={handleLogout} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
               <LogOut className="w-4 h-4" />
             </button>

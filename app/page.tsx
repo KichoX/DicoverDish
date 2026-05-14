@@ -3,11 +3,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SiteHeader } from '@/components/site-header'
 import { MobileNav } from '@/components/mobile-nav'
 import { Footer } from '@/components/footer'
-import { restaurants } from '@/lib/data'
+import { restaurants as staticRestaurants } from '@/lib/data'
+import { api } from '@/lib/api'
+import { useAppStore } from '@/lib/store'
 
 /* ── Inline SVG icons matching the prototype's DDIcon paths ── */
 function Icon({ name, size = 18, className }: { name: string; size?: number; className?: string }) {
@@ -51,6 +53,10 @@ const moods = [
 const trending = ['Natural wine bars', 'Omakase', 'Sunday brunch', '72-hour pizza', 'Date night · €€€']
 
 const cities = [
+<<<<<<< Updated upstream
+=======
+  { name: 'Frankfurt', count: 621, img: 'https://images.unsplash.com/photo-1577368211130-4bbd0181ddf0?w=800&q=80' },
+>>>>>>> Stashed changes
   { name: 'Berlin',  count: 1214, img: 'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?w=800&q=80' },
   { name: 'Munich',  count: 844,  img: 'https://images.unsplash.com/photo-1595867818082-083862f3d630?w=800&q=80' },
   { name: 'Cologne', count: 438,  img: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80' },
@@ -67,9 +73,14 @@ function priceLevel(rating: number) {
   )
 }
 
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
 /* ── Restaurant card (5/4 aspect, editorial) ── */
-function RestaurantCard({ r, faved = false, onFav }: {
-  r: (typeof restaurants)[number]
+function RestaurantCard({ r, imageOverride, faved = false, onFav }: {
+  r: typeof staticRestaurants[number]
+  imageOverride?: { src: string; scale: number; x: number; y: number; rotation: number; flipH: boolean; flipV: boolean } | null
   faved?: boolean
   onFav?: (id: string) => void
 }) {
@@ -77,17 +88,27 @@ function RestaurantCard({ r, faved = false, onFav }: {
   const etaMin = 15 + (parseInt(r.id) * 7) % 20
 
   return (
-    <Link href={`/r/${r.id}`} className="block group" style={{ textDecoration: 'none' }}>
+    <Link href={`/r/${generateSlug(r.name)}`} className="block group" style={{ textDecoration: 'none' }}>
       <div
         className="relative overflow-hidden mb-3.5"
         style={{ aspectRatio: '5/4', borderRadius: 'var(--radius)' }}
       >
-        <Image
-          src={r.image}
-          alt={r.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-        />
+        {imageOverride ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageOverride.src}
+            alt={r.name}
+            className="w-full h-full transition-transform duration-500 group-hover:scale-[1.04]"
+            style={{ objectFit: 'cover', transform: `translate(${imageOverride.x}%, ${imageOverride.y}%) scale(${imageOverride.scale}) rotate(${imageOverride.rotation}deg)${imageOverride.flipH ? ' scaleX(-1)' : ''}${imageOverride.flipV ? ' scaleY(-1)' : ''}`, transformOrigin: 'center', display: 'block' }}
+          />
+        ) : (
+          <Image
+            src={r.image}
+            alt={r.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+        )}
         {/* Fav button */}
         <button
           onClick={(e) => { e.preventDefault(); onFav?.(r.id) }}
@@ -155,13 +176,15 @@ function Collection({
   items,
   favs,
   onFav,
+  profileImageMap,
 }: {
   label?: string
   title: string
   sub?: string
-  items: (typeof restaurants)[number][]
+  items: typeof staticRestaurants[number][]
   favs?: Set<string>
   onFav?: (id: string) => void
+  profileImageMap?: Record<string, { src: string; scale: number; x: number; y: number; rotation: number; flipH: boolean; flipV: boolean }>
 }) {
   return (
     <section className="py-14" style={{ borderBottom: '1px solid var(--hairline)' }}>
@@ -188,7 +211,13 @@ function Collection({
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-7">
           {items.map((r) => (
-            <RestaurantCard key={r.id} r={r} faved={favs?.has(r.id)} onFav={onFav} />
+            <RestaurantCard
+              key={r.id}
+              r={r}
+              imageOverride={profileImageMap?.[r.name] ?? null}
+              faved={favs?.has(r.id)}
+              onFav={onFav}
+            />
           ))}
         </div>
       </div>
@@ -200,7 +229,13 @@ function Collection({
 export default function HomePage() {
   const [query, setQuery] = useState('')
   const [favs, setFavs] = useState<Set<string>>(new Set())
+  const [restaurants, setRestaurants] = useState(staticRestaurants)
   const router = useRouter()
+  const { restaurantProfile } = useAppStore()
+
+  useEffect(() => {
+    api.getRestaurants().then(setRestaurants).catch(() => {})
+  }, [])
 
   const toggleFav = (id: string) =>
     setFavs((prev) => {
@@ -212,9 +247,11 @@ export default function HomePage() {
   const openNow  = restaurants.filter((r) => r.isOpen)
   const topRated = [...restaurants].sort((a, b) => b.rating - a.rating).slice(0, 4)
   const walkIn   = openNow.slice(0, 4)
-  const featured = restaurants.find((r) => r.id === '9') ?? restaurants[0]
+  const featured = restaurants.find((r) => r.name === 'Ristorante Matera') ?? restaurants[0]
 
-  const avgRating = (restaurants.reduce((s, r) => s + r.rating, 0) / restaurants.length).toFixed(1)
+  const avgRating = restaurants.length
+    ? (restaurants.reduce((s, r) => s + r.rating, 0) / restaurants.length).toFixed(1)
+    : '0.0'
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -406,14 +443,19 @@ export default function HomePage() {
                     className="relative flex-shrink-0 overflow-hidden"
                     style={{ width: 64, height: 64, borderRadius: 8 }}
                   >
-                    <Image src={featured.image} alt={featured.name} fill className="object-cover" />
+                    {restaurantProfile.profileImage && featured.name === 'Ristorante Matera' ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={restaurantProfile.profileImage.src} alt={featured.name} className="w-full h-full" style={{ objectFit: 'cover', transform: `translate(${restaurantProfile.profileImage.x}%, ${restaurantProfile.profileImage.y}%) scale(${restaurantProfile.profileImage.scale}) rotate(${restaurantProfile.profileImage.rotation}deg)${restaurantProfile.profileImage.flipH ? ' scaleX(-1)' : ''}${restaurantProfile.profileImage.flipV ? ' scaleY(-1)' : ''}`, transformOrigin: 'center', display: 'block' }} />
+                    ) : (
+                      <Image src={featured.image} alt={featured.name} fill className="object-cover" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div style={{ fontFamily: 'var(--font-serif)', fontSize: 16, fontWeight: 400, color: 'var(--ink)' }}>{featured.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--muted-ink)' }}>Berlin · Italian</div>
                   </div>
                   <Link
-                    href={`/r/${featured.id}`}
+                    href={`/r/${generateSlug(featured.name)}`}
                     className="flex-shrink-0 flex items-center gap-1 transition-colors"
                     style={{
                       height: 34, padding: '0 14px',
@@ -541,6 +583,7 @@ export default function HomePage() {
         items={openNow.slice(0, 4)}
         favs={favs}
         onFav={toggleFav}
+        profileImageMap={restaurantProfile.profileImage ? { 'Ristorante Matera': restaurantProfile.profileImage } : undefined}
       />
 
       {/* ════════ EDITORIAL FEATURE ════════ */}
@@ -555,12 +598,12 @@ export default function HomePage() {
               className="relative hidden md:block"
               style={{ aspectRatio: '4/5', borderRadius: 'var(--radius)', overflow: 'hidden' }}
             >
-              <Image
-                src={featured.image}
-                alt={featured.name}
-                fill
-                className="object-cover"
-              />
+              {restaurantProfile.profileImage && featured.name === 'Ristorante Matera' ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={restaurantProfile.profileImage.src} alt={featured.name} className="w-full h-full" style={{ objectFit: 'cover', transform: `translate(${restaurantProfile.profileImage.x}%, ${restaurantProfile.profileImage.y}%) scale(${restaurantProfile.profileImage.scale}) rotate(${restaurantProfile.profileImage.rotation}deg)${restaurantProfile.profileImage.flipH ? ' scaleX(-1)' : ''}${restaurantProfile.profileImage.flipV ? ' scaleY(-1)' : ''}`, transformOrigin: 'center', display: 'block' }} />
+              ) : (
+                <Image src={featured.image} alt={featured.name} fill className="object-cover" />
+              )}
             </div>
             {/* Text right */}
             <div>
@@ -599,7 +642,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3.5 mt-8">
                 <Link
-                  href={`/r/${featured.id}`}
+                  href={`/r/${generateSlug(featured.name)}`}
                   className="flex items-center gap-2 transition-opacity hover:opacity-85"
                   style={{
                     height: 52, padding: '0 24px',
@@ -640,6 +683,7 @@ export default function HomePage() {
         items={topRated}
         favs={favs}
         onFav={toggleFav}
+        profileImageMap={restaurantProfile.profileImage ? { 'Ristorante Matera': restaurantProfile.profileImage } : undefined}
       />
 
       {/* ════════ COLLECTION: walk-in worthy ════════ */}
@@ -649,6 +693,7 @@ export default function HomePage() {
         items={walkIn.slice(0, 3)}
         favs={favs}
         onFav={toggleFav}
+        profileImageMap={restaurantProfile.profileImage ? { 'Ristorante Matera': restaurantProfile.profileImage } : undefined}
       />
 
       {/* ════════ CITY DIAL ════════ */}

@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: discoverdish-db
+    environment:
+      POSTGRES_DB: discoverdish
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: discoverdish-api
+    ports:
+      - "5050:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=discoverdish;Username=postgres;Password=postgres
+      - Jwt__Key=DiscoverDish-SuperSecretKey-MustBe32CharactersOrLonger!
+      - Jwt__Issuer=DiscoverDish.Api
+      - Jwt__Audience=DiscoverDish.Client
+      - Jwt__AccessTokenExpiryMinutes=60
+      - Jwt__RefreshTokenExpiryDays=30
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -107,5 +107,5 @@ public class ReservationService(AppDbContext db) : IReservationService
         r.Date.ToString("yyyy-MM-dd"),
         r.Time.ToString("HH:mm"),
         r.Guests, r.Occasion, r.SpecialRequests,
-        r.Status.ToString(), r.CreatedAt);
+        r.Status.ToString().ToLowerInvariant(), r.CreatedAt);
 }

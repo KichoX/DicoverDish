@@ -175,7 +175,7 @@ export default function ReservationsPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <MapPin className="w-4 h-4" />
-                                  <span>Table {reservation.tableNumber}</span>
+                                  <span>Table {(reservation as any).tableNumber}</span>
                                 </div>
                               </div>
                             </div>

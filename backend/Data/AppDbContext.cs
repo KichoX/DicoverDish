@@ -163,7 +163,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 Id = r5, Name = "Bodhi Vegan Living", Slug = "bodhi-vegan-living",
                 ImageUrl = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
                 Rating = 9.5m, Cuisines = ["Chinese"], Tags = ["Vegan", "Vegetarian"],
-                IsOpen = true, Hours = "11:00AM - 10:00PM", Address = "Lange Reihe 93, Hamburg",
+                IsOpen = true, Hours = "11:00AM - 10:00PM", Address = "Lange Reihe 93, Berlin",
                 Description = "Award-winning vegan Asian cuisine with creative plant-based dishes.",
                 CreatedAt = now, UpdatedAt = now
             },

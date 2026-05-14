@@ -119,12 +119,20 @@ public class OrderService(AppDbContext db) : IOrderService
         return Map(order, order.Restaurant.Name);
     }
 
+    private static string MapType(OrderType t) => t switch
+    {
+        OrderType.DineIn   => "dine-in",
+        OrderType.Delivery => "delivery",
+        OrderType.Pickup   => "pickup",
+        _ => t.ToString().ToLowerInvariant()
+    };
+
     private static OrderDto Map(Order o, string restaurantName) => new(
         o.Id, o.RestaurantId, restaurantName, o.UserId,
-        o.Type.ToString(), o.TableNumber, o.DeliveryAddress,
+        MapType(o.Type), o.TableNumber, o.DeliveryAddress,
         o.GuestName, o.GuestPhone, o.OrderNotes,
         o.Subtotal, o.DeliveryFee, o.Total,
-        o.Status.ToString(),
+        o.Status.ToString().ToLowerInvariant(),
         o.Items.Select(i => new OrderItemDto(
             i.Id, i.MenuItemId, i.MenuItemName, i.UnitPrice, i.Quantity, i.Notes
         )).ToList(),
