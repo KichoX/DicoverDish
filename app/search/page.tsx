@@ -6,6 +6,11 @@ import Image from 'next/image'
 import { AppShell } from '@/components/app-shell'
 import { restaurants } from '@/lib/data'
 
+// Helper to generate slug from restaurant name (matches /r/[slug] route)
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
 /* ── Inline icon (stroke-based, matches design system) ── */
 function Icon({ name, size = 16 }: { name: string; size?: number }) {
   const paths: Record<string, React.ReactNode> = {
@@ -35,7 +40,7 @@ function SearchCard({ restaurant }: { restaurant: typeof restaurants[0] }) {
   const hasDelivery = restaurant.tags?.includes('Delivery')
 
   return (
-    <Link href={`/r/${restaurant.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+    <Link href={`/r/${generateSlug(restaurant.name)}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
       <article
         className="group"
         style={{
@@ -58,7 +63,7 @@ function SearchCard({ restaurant }: { restaurant: typeof restaurants[0] }) {
           {/* Heart */}
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavourite(restaurant.id) }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFav(!isFav) }}
             aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
             style={{
               position: 'absolute', top: 10, right: 10,
@@ -343,7 +348,7 @@ export default function SearchPage() {
           ) : view === 'list' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {results.map(r => (
-                <Link key={r.id} href={`/r/${r.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link key={r.id} href={`/r/${generateSlug(r.name)}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                   <div style={{
                     display: 'flex', gap: 16, padding: 16,
                     background: 'var(--paper)',

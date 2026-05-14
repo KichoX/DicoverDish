@@ -9,6 +9,11 @@ import { MobileNav } from '@/components/mobile-nav'
 import { Footer } from '@/components/footer'
 import { restaurants } from '@/lib/data'
 
+// Helper to generate slug from restaurant name (matches /r/[slug] route)
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
 /* ── Inline SVG icons matching the prototype's DDIcon paths ── */
 function Icon({ name, size = 18, className }: { name: string; size?: number; className?: string }) {
   const paths: Record<string, React.ReactNode> = {
@@ -77,7 +82,7 @@ function RestaurantCard({ r, faved = false, onFav }: {
   const etaMin = 15 + (parseInt(r.id) * 7) % 20
 
   return (
-    <Link href={`/r/${r.id}`} className="block group" style={{ textDecoration: 'none' }}>
+    <Link href={`/r/${generateSlug(r.name)}`} className="block group" style={{ textDecoration: 'none' }}>
       <div
         className="relative overflow-hidden mb-3.5"
         style={{ aspectRatio: '5/4', borderRadius: 'var(--radius)' }}
@@ -413,7 +418,7 @@ export default function HomePage() {
                     <div style={{ fontSize: 12, color: 'var(--muted-ink)' }}>Berlin · Italian</div>
                   </div>
                   <Link
-                    href={`/r/${featured.id}`}
+                    href={`/r/${generateSlug(featured.name)}`}
                     className="flex-shrink-0 flex items-center gap-1 transition-colors"
                     style={{
                       height: 34, padding: '0 14px',
@@ -599,7 +604,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3.5 mt-8">
                 <Link
-                  href={`/r/${featured.id}`}
+                  href={`/r/${generateSlug(featured.name)}`}
                   className="flex items-center gap-2 transition-opacity hover:opacity-85"
                   style={{
                     height: 52, padding: '0 24px',
@@ -613,7 +618,7 @@ export default function HomePage() {
                   Read the full essay
                 </Link>
                 <Link
-                  href={`/r/${featured.id}/reserve`}
+                  href={`/r/${generateSlug(featured.name)}/reserve`}
                   className="flex items-center gap-2 transition-all hover:bg-[color:var(--ink)] hover:text-[color:var(--canvas)]"
                   style={{
                     height: 52, padding: '0 24px',
