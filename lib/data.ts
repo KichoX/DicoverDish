@@ -58,7 +58,7 @@ export const restaurants: Restaurant[] = [
     tags: ['Vegan', 'Vegetarian'],
     isOpen: true,
     hours: '11:00AM - 10:00PM',
-    address: 'Lange Reihe 93, Hamburg',
+    address: 'Lange Reihe 93, Berlin',
     description: 'Award-winning vegan Asian cuisine with creative plant-based dishes.',
   },
   {

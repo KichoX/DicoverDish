@@ -95,7 +95,7 @@ export function Footer() {
           className="flex items-center justify-between"
           style={{ paddingTop: 20, paddingBottom: 64, borderTop: '1px solid var(--hairline)', fontSize: 12 }}
         >
-          <span>© 2026 DiscoverDish — Made in Hamburg</span>
+          <span>© 2026 DiscoverDish — Made in Berlin</span>
           <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted-2)' }}>
             v2026.4 · spring edition
           </span>

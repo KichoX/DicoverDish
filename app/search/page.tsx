@@ -97,7 +97,7 @@ function SearchCard({ restaurant }: { restaurant: typeof restaurants[0] }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, fontSize: 11, color: 'var(--muted-ink)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             <span>{cuisine}</span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--muted-2)', display: 'inline-block' }} />
-            <span>Hamburg</span>
+            <span>Berlin</span>
           </div>
           {/* Name */}
           <h3 style={{
@@ -207,7 +207,7 @@ export default function SearchPage() {
           {/* Header */}
           <div style={{ padding: '28px 24px', borderBottom: '1px solid var(--hairline)' }}>
             <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted-ink)', marginBottom: 10 }}>
-              In Hamburg
+              In Berlin
             </div>
             <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 30, fontWeight: 400, margin: 0, color: 'var(--ink)', lineHeight: 1.1 }}>
               {results.length} places
@@ -355,7 +355,7 @@ export default function SearchPage() {
                     </div>
                     <div>
                       <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--muted-ink)', marginBottom: 4 }}>
-                        {r.cuisines?.[0]} · Hamburg
+                        {r.cuisines?.[0]} · Berlin
                       </div>
                       <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 400, margin: '0 0 8px', color: 'var(--ink)' }}>
                         {r.name}
